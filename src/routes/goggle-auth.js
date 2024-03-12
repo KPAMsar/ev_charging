@@ -39,18 +39,17 @@ googleAuthRouter.get("/login", function (req, res) {
 googleAuthRouter.get(
   "/auth/google",
   passport.authenticate("google", {
-    scope: ["profile"],
-    accessType: "offline",
+    scope: ["profile", "email"],
   })
 );
 
 // Google authentication callback route
 googleAuthRouter.get(
   "/auth/google/redirect",
-  passport.authenticate("google", {
-    successRedirect: "/",
-    failureRedirect: "/login",
-  })
+  passport.authenticate("google"),
+  (req, res) => {
+    // console.log("user", req.user);
+  }
 );
 
 // Logout route

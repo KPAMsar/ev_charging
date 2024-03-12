@@ -3,15 +3,9 @@ mongoose.Promise = global.Promise;
 var Schema = mongoose.Schema;
 
 var User = new Schema({
-  // google: {
-  //   id: String,
-  //   token: String,
-  //   refreshToken: String,
-  //   displayName: String,
-  //   email: String,
-  //   expiry_date: Number,
-  // },
+  userId: String,
   name: String,
+  picture: String,
   email: String,
   role: {
     type: String,

@@ -23,6 +23,7 @@ module.exports = function (passport) {
         done(err, null);
       });
   });
+
   // For Google
   passport.use(
     new GoogleStrategy(
@@ -41,9 +42,19 @@ module.exports = function (passport) {
           } else {
             // new user case
             // insert new user id
+            const email =
+              profile.emails && profile.emails.length > 0
+                ? profile.emails[0].value
+                : null;
+
             new User({
               userId: profile.id,
-              username: profile.displayName,
+              email: email,
+              name: profile.displayName,
+              picture:
+                profile.photos && profile.photos.length > 0
+                  ? profile.photos[0].value
+                  : null,
             })
               .save()
               .then((user) => {
@@ -51,7 +62,6 @@ module.exports = function (passport) {
               });
           }
         });
-        /* ========= DATABASE CHECK PRE EXIST AND INSERT QUERY: END =========  */
       }
     )
   );
