@@ -3,7 +3,7 @@ const { uri } = require("../config/mongo.database.config");
 require("../config/mongo.database.config");
 
 exports.dbConnection = mongoose
-  .connect(uri, { useNewUrlParser: true, useUnifiedTopology: true })
+  .connect(uri)
   .then(() => {
     console.log("database successfully connected");
   })
