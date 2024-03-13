@@ -9,7 +9,14 @@ const userSchema = new mongoose.Schema({
   middlename: String,
   phone_number: String,
 
-  picture: String,
+  picture: {
+    public_id: {
+      type: String,
+    },
+    url: {
+      type: String,
+    },
+  },
   email: {
     type: String,
     unique: true,

@@ -267,6 +267,64 @@ const CheckPhoneAndMailAvailability = async (req, res) => {
   }
 };
 
+const ResetPassword = async (req, res) => {
+  const { email } = req.body;
+
+  if (!email) {
+    return res.status(400).json({
+      success: false,
+      message: "Email is required",
+    });
+  }
+  const user = await User.findOne({ email: email.toLowerCase().trim() });
+
+  if (!user) {
+    return res.status(404).json({
+      success: false,
+      message: "User not found for the provided email",
+    });
+  }
+
+  const code = otpGenerator.generate(4, {
+    lowerCaseAlphabets: false,
+    upperCaseAlphabets: false,
+    specialChars: false,
+  });
+
+  const otpExpirationTime = new Date();
+  otpExpirationTime.setMinutes(otpExpirationTime.getMinutes() + 15);
+
+  const otp = new OTP({
+    email: email,
+    code,
+    type: "Password Reset",
+    expiresIn: otpExpirationTime,
+  });
+
+  await otp.save();
+
+  // Send email with OTP
+  const sentMail = await sendEmail(email, code);
+
+  console.log("Reset pASSWPRDMail sent:", sentMail);
+  if (sentMail !== true) {
+    return res.json({
+      success: true,
+      message: "Something went wrong",
+    });
+  }
+
+  return res.status(200).json({
+    success: true,
+    message: "Email verification code sent successfully.",
+    data: {
+      email: savedUser.email,
+      phone_number: savedUser.phone_number,
+      ...tokenPair,
+    },
+  });
+};
+
 const sendVerificationEmail = async (req, res) => {
   try {
     // console.log("ee", req.user);
@@ -317,4 +375,5 @@ module.exports = {
   Login,
   CheckPhoneAndMailAvailability,
   verifyEmail,
+  ResetPassword,
 };
