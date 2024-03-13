@@ -8,14 +8,15 @@ const { sendEmail } = require("../utils/sendEmail");
 require("dotenv").config();
 
 const generateTokens = (user) => {
+  console.log(user);
   const accessToken = jwt.sign(
-    { name: user.name, role: user.role, userId: user.id },
+    { name: user.email, role: user.role, userId: user._id },
     "AzTQ,RP)0(",
     { expiresIn: "24h" }
   );
 
   const refreshToken = jwt.sign(
-    { userId: user.id },
+    { userId: user._id },
     process.env.REFRESH_TOKEN_SECRET,
     { expiresIn: "1d" }
   );
