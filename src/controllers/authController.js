@@ -88,23 +88,19 @@ const SignUp = async (req, res) => {
     // Check if email is already registered
     const existingEmail = await User.findOne({ email }).exec();
     if (existingEmail) {
-      return res
-        .status(409)
-        .json({
-          success: false,
-          message: "Email is already taken by another user.",
-        });
+      return res.status(409).json({
+        success: false,
+        message: "Email is already taken by another user.",
+      });
     }
 
     // Check if phone number is already registered
     const existingPhoneNumber = await User.findOne({ phone_number }).exec();
     if (existingPhoneNumber) {
-      return res
-        .status(409)
-        .json({
-          success: false,
-          message: "Phone number is already taken by another user.",
-        });
+      return res.status(409).json({
+        success: false,
+        message: "Phone number is already taken by another user.",
+      });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -159,12 +155,10 @@ const SignUp = async (req, res) => {
 
     if (error.code === 11000) {
       // MongoDB duplicate key error code
-      return res
-        .status(409)
-        .json({
-          success: false,
-          message: "Email or phone number is already taken.",
-        });
+      return res.status(409).json({
+        success: false,
+        message: "Email or phone number is already taken.",
+      });
     }
 
     res.status(500).json({
@@ -179,7 +173,7 @@ const verifyEmail = async (req, res) => {
     const { email, code } = req.body;
 
     if (!email || !code) {
-      return res.status(StatusCodes.BAD_REQUEST).json({
+      return res.status(400).json({
         success: false,
         message: "Email and verification code are required",
       });
@@ -189,7 +183,7 @@ const verifyEmail = async (req, res) => {
     const user = await User.findOne({ email: email.toLowerCase().trim() });
 
     if (!user) {
-      return res.status(StatusCodes.NOT_FOUND).json({
+      return res.status(404).json({
         success: false,
         message: "User not found for the provided email",
       });
@@ -203,7 +197,7 @@ const verifyEmail = async (req, res) => {
     });
 
     if (!otpRecord || otpRecord.expiresIn < new Date()) {
-      return res.status(StatusCodes.UNAUTHORIZED).json({
+      return res.status(401).json({
         success: false,
         message: "Invalid or expired verification code",
       });
@@ -215,14 +209,14 @@ const verifyEmail = async (req, res) => {
     // Delete the used OTP record
     await otpRecord.deleteOne();
 
-    res.status(StatusCodes.OK).json({
+    res.status(200).json({
       success: true,
       message: "Email verified successful",
     });
   } catch (error) {
     console.error(error);
 
-    res.status(StatusCodes.SERVER_ERROR).json({
+    res.status(500).json({
       success: false,
       message: "Something went wrong",
     });
