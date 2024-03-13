@@ -194,6 +194,7 @@ const verifyEmail = async (req, res) => {
       email: email,
       code,
       type: "emailVerification",
+      isValid: true,
     });
 
     if (!otpRecord || otpRecord.expiresIn < new Date()) {
@@ -202,6 +203,9 @@ const verifyEmail = async (req, res) => {
         message: "Invalid or expired verification code",
       });
     }
+
+    otpRecord.isValid = false;
+    await otpRecord.save();
 
     user.isEmailVerified = true;
     await user.save();
