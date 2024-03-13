@@ -1,17 +1,45 @@
-var mongoose = require("mongoose");
-mongoose.Promise = global.Promise;
-var Schema = mongoose.Schema;
+const mongoose = require("mongoose");
+const bcrypt = require("bcrypt");
 
-var User = new Schema({
+const userSchema = new mongoose.Schema({
   userId: String,
   name: String,
+  firstname: String,
+  lastname: String,
+  middlename: String,
+
   picture: String,
-  email: String,
+  email: {
+    type: String,
+    unique: true,
+  },
+
   role: {
     type: String,
     enum: ["admin", "user", "super-admin"],
     default: "user",
   },
+  password: String,
+  isEmailVerified: {
+    type: String,
+    enum: [true, false],
+    default: false,
+  },
+  refreshToken: {
+    type: [String],
+    default: [],
+  },
 });
 
-module.exports = mongoose.model("User", User);
+userSchema.methods.comparePassword = async function (candidatePassword) {
+  try {
+    const isMatched = await bcrypt.compare(candidatePassword, this.password);
+    return isMatched;
+  } catch (error) {
+    throw new Error(error);
+  }
+};
+
+const User = mongoose.model("User", userSchema);
+
+module.exports = User;
