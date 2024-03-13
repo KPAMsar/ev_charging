@@ -88,19 +88,21 @@ const SignUp = async (req, res) => {
     // Check if email is already registered
     const existingEmail = await User.findOne({ email }).exec();
     if (existingEmail) {
-      return res.status(409).json({
+      res.status(409).json({
         success: false,
         message: "Email is already taken by another user.",
       });
+      return;
     }
 
     // Check if phone number is already registered
     const existingPhoneNumber = await User.findOne({ phone_number }).exec();
     if (existingPhoneNumber) {
-      return res.status(409).json({
+      res.status(409).json({
         success: false,
         message: "Phone number is already taken by another user.",
       });
+      return;
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
