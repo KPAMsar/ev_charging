@@ -317,11 +317,6 @@ const ResetPassword = async (req, res) => {
   return res.status(200).json({
     success: true,
     message: "Email verification code sent successfully.",
-    data: {
-      email: savedUser.email,
-      phone_number: savedUser.phone_number,
-      ...tokenPair,
-    },
   });
 };
 
