@@ -79,38 +79,34 @@ const SignUp = async (req, res) => {
   try {
     const { first_name, last_name, email, phone_number, password } = req.body;
 
-    if (!first_name) {
-      return res.send("First name is required");
-    }
-    if (!last_name) {
-      return res.send("Last name is required");
-    }
-    if (!email) {
-      return res.send("Email is required");
-    }
-    if (!phone_number) {
-      return res.send("Phone number is required");
-    }
-    if (!password) {
-      return res.send("Password is required");
+    if (!first_name || !last_name || !email || !phone_number || !password) {
+      return res
+        .status(400)
+        .json({ success: false, message: "All fields are required." });
     }
 
-    const findEmail = await User.findOne({ email: email }).exec();
-
-    if (findEmail) {
-      return res.status(409).json({
-        success: false,
-        message: "Email is already taken by another user",
-      });
+    // Check if email is already registered
+    const existingEmail = await User.findOne({ email }).exec();
+    if (existingEmail) {
+      return res
+        .status(409)
+        .json({
+          success: false,
+          message: "Email is already taken by another user.",
+        });
     }
-    const findNum = await User.findOne({ phone_number }).exec();
 
-    if (findNum) {
-      return res.status(409).json({
-        success: false,
-        message: "Phone number is already taken by another user",
-      });
+    // Check if phone number is already registered
+    const existingPhoneNumber = await User.findOne({ phone_number }).exec();
+    if (existingPhoneNumber) {
+      return res
+        .status(409)
+        .json({
+          success: false,
+          message: "Phone number is already taken by another user.",
+        });
     }
+
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const newUser = new User({
@@ -121,8 +117,8 @@ const SignUp = async (req, res) => {
       password: hashedPassword,
     });
 
-    const saveBiodata = await newUser.save();
-    const tokenPair = generateTokens(saveBiodata);
+    const savedUser = await newUser.save();
+    const tokenPair = generateTokens(savedUser);
 
     //SEND OTP
     const code = otpGenerator.generate(4, {
@@ -136,29 +132,40 @@ const SignUp = async (req, res) => {
     otpExpirationTime.setMinutes(otpExpirationTime.getMinutes() + 15);
 
     const otp = new OTP({
-      email: saveBiodata.email,
+      email: savedUser.email,
       code,
       type: "emailVerification",
       expiresIn: otpExpirationTime,
     });
 
-    const saveOtp = await otp.save();
+    await otp.save();
 
-    // VerifyEmail(email, otp);
-    const sentMail = await sendEmail(email, code);
+    // Send email with OTP
+    const sentMail = await sendEmail(savedUser.email, code);
 
-    console.log("mail", sentMail);
+    console.log("Mail sent:", sentMail);
+
     return res.status(200).json({
       success: true,
-      message: "Email verfication code sent successfully",
+      message: "Email verification code sent successfully.",
       data: {
-        email: saveBiodata.email,
-        phone_number: saveBiodata.phone_number,
+        email: savedUser.email,
+        phone_number: savedUser.phone_number,
         ...tokenPair,
       },
     });
   } catch (error) {
-    console.error(error);
+    console.error("SignUp error:", error);
+
+    if (error.code === 11000) {
+      // MongoDB duplicate key error code
+      return res
+        .status(409)
+        .json({
+          success: false,
+          message: "Email or phone number is already taken.",
+        });
+    }
 
     res.status(500).json({
       success: false,
