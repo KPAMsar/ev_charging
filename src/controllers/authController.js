@@ -191,7 +191,7 @@ const verifyEmail = async (req, res) => {
 
     // Find the corresponding OTP record for the user and the provided code
     const otpRecord = await OTP.findOne({
-      user: user.id,
+      email: email,
       code,
       type: "emailVerification",
     });
