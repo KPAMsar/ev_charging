@@ -4,7 +4,12 @@ const bcrypt = require("bcrypt");
 const VerifyEmail = require("../utils/sendEmail");
 const OTP = require("../../src/models/OTP");
 const otpGenerator = require("otp-generator");
-const { sendEmail } = require("../utils/sendEmail");
+const {
+  sendEmail,
+  sendSuccessRegEmail,
+  sendSuccessResetEmail,
+  sendResetEmail,
+} = require("../utils/sendEmail");
 require("dotenv").config();
 
 const generateTokens = (user) => {
@@ -35,7 +40,14 @@ const Login = async (req, res) => {
   if (!foundUser) return res.sendStatus(401); //Unauthorized
 
   const match = await foundUser.comparePassword(password);
+
   if (match) {
+    if (match.isEmailVerified !== false) {
+      res.json({
+        message: "User is not verified",
+      });
+      return null;
+    }
     const role = foundUser.role;
 
     // Generate access token
@@ -215,8 +227,8 @@ const verifyEmail = async (req, res) => {
 
     // Delete the used OTP record
     await otpRecord.deleteOne();
-
-    res.status(200).json({
+    sendSuccessRegEmail();
+    return res.status(200).json({
       success: true,
       message: "Email verified successful",
     });
@@ -297,14 +309,14 @@ const ResetPassword = async (req, res) => {
   const otp = new OTP({
     email: email,
     code,
-    type: "Password Reset",
+    type: "passwordReset",
     expiresIn: otpExpirationTime,
   });
 
   await otp.save();
 
   // Send email with OTP
-  const sentMail = await sendEmail(email, code);
+  const sentMail = await sendResetEmail(email, code);
 
   console.log("Reset pASSWPRDMail sent:", sentMail);
   if (sentMail !== true) {
@@ -320,6 +332,152 @@ const ResetPassword = async (req, res) => {
   });
 };
 
+const verifyResetPasswordOTP = async (req, res) => {
+  try {
+    const { email, code } = req.body;
+
+    if (!email || !code) {
+      return res.status(400).json({
+        success: false,
+        message: "Email and verification code are required",
+      });
+    }
+
+    // Find the user based on the provided email
+    const user = await User.findOne({ email: email.toLowerCase().trim() });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found for the provided email",
+      });
+    }
+
+    // Find the corresponding OTP record for the user and the provided code
+    const otpRecord = await OTP.findOne({
+      email: email,
+      code,
+      type: "passwordReset",
+      isValid: true,
+    });
+
+    if (!otpRecord || otpRecord.expiresIn < new Date()) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid or expired verification code",
+      });
+    }
+
+    otpRecord.isValid = false;
+    await otpRecord.save();
+
+    user.isEmailVerified = true;
+    await user.save();
+
+    // Delete the used OTP record
+    // await otpRecord.deleteOne();
+
+    return res.status(200).json({
+      success: true,
+      message: "Email verified successful",
+    });
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      success: false,
+      message: "Something went wrong",
+    });
+  }
+};
+
+const ChangePassword = async (req, res) => {
+  try {
+    const { userId, oldPassword, newPassword } = req.body;
+
+    // Find the user by userId
+    const user = await User.findById(userId);
+
+    // If user not found, return error
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
+    }
+
+    // Check if the old password matches
+    const isPasswordValid = await bcrypt.compare(oldPassword, user.password);
+
+    if (!isPasswordValid) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Old password is incorrect" });
+    }
+
+    // Hash the new password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // Update user's password
+    user.password = hashedPassword;
+    await user.save();
+
+    return res
+      .status(200)
+      .json({ success: true, message: "Password changed successfully" });
+  } catch (error) {
+    console.error(error);
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal Server Error" });
+  }
+};
+
+const ResetMyPassword = async (req, res) => {
+  try {
+    const { email, newPassword, confirmPassword, resetToken } = req.body;
+
+    // Check if newPassword and confirmPassword match
+    if (newPassword !== confirmPassword) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Passwords do not match" });
+    }
+
+    // Find the user by email and resetToken
+    const user = await User.findOne({ email });
+    console.log("jjjjjjjj", user);
+    const foundUserOTP = await OTP.findOne({
+      email,
+      code: resetToken,
+      isValid: true,
+    });
+    return console.log("FOUNDD", foundUserOTP);
+    // If user not found or reset token is expired, return error
+    if (!user || user.resetTokenExpiry < Date.now()) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid or expired reset token" });
+    }
+
+    // Hash the new password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // Update user's password and resetToken
+    user.password = hashedPassword;
+    user.resetToken = undefined;
+    user.resetTokenExpiry = undefined;
+    await user.save();
+
+    return res
+      .status(200)
+      .json({ success: true, message: "Password reset successfully" });
+  } catch (error) {
+    console.error(error);
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal Server Error" });
+  }
+};
 const sendVerificationEmail = async (req, res) => {
   try {
     // console.log("ee", req.user);
@@ -371,4 +529,7 @@ module.exports = {
   CheckPhoneAndMailAvailability,
   verifyEmail,
   ResetPassword,
+  verifyResetPasswordOTP,
+  ChangePassword,
+  ResetMyPassword,
 };

@@ -1,43 +1,46 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 
-const userSchema = new mongoose.Schema({
-  userId: String,
-  name: String,
-  firstname: String,
-  lastname: String,
-  middlename: String,
-  phone_number: String,
+const userSchema = new mongoose.Schema(
+  {
+    userId: String,
+    name: String,
+    firstname: String,
+    lastname: String,
+    middlename: String,
+    phone_number: String,
 
-  picture: {
-    public_id: {
-      type: String,
+    picture: {
+      public_id: {
+        type: String,
+      },
+      url: {
+        type: String,
+      },
     },
-    url: {
+    email: {
       type: String,
+      unique: true,
     },
-  },
-  email: {
-    type: String,
-    unique: true,
-  },
 
-  role: {
-    type: String,
-    enum: ["admin", "user", "super-admin"],
-    default: "user",
+    role: {
+      type: String,
+      enum: ["admin", "user", "super-admin"],
+      default: "user",
+    },
+    password: String,
+    isEmailVerified: {
+      type: String,
+      enum: [true, false],
+      default: false,
+    },
+    refreshToken: {
+      type: [String],
+      default: [],
+    },
   },
-  password: String,
-  isEmailVerified: {
-    type: String,
-    enum: [true, false],
-    default: false,
-  },
-  refreshToken: {
-    type: [String],
-    default: [],
-  },
-});
+  { timestamps: true }
+);
 
 userSchema.methods.comparePassword = async function (candidatePassword) {
   try {
