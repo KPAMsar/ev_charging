@@ -9,8 +9,9 @@ const LoadUsers = async () => {
     } else {
       const newUser = new User({
         name: "Admin User",
-        email: "admin@example.com",
-        password: "12345",
+        email: "kpamdev@gmail.com",
+        password:
+          "$2b$10$qZaDPR3koVncOKvTVcpKn.24WNTcTan0U9eX8DQvMyFzqhgsQKTZm",
         role: "admin",
       });
       const result = await newUser.save();

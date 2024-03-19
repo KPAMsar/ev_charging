@@ -10,6 +10,7 @@ const AuthRoutes = require("./src/routes/auth");
 const PrivacyPolicyRoutes = require("./src/routes/privacyPolicy");
 const FAQRoutes = require("./src/routes/faq");
 const TermsConditionsRoutes = require("./src/routes/terms&conditions");
+const ProfileRoutes = require("./src/routes/profile");
 
 const app = express();
 app.use(express.json());
@@ -33,6 +34,7 @@ app.use("/api/auth/", AuthRoutes);
 app.use("/api/privacy-policy", PrivacyPolicyRoutes);
 app.use("/api/faq", FAQRoutes);
 app.use("/api/terms-conditions", TermsConditionsRoutes);
+app.use("/api/profile", ProfileRoutes);
 
 const port = process.env.PORT;
 app.listen(port, () => {

@@ -1,22 +1,24 @@
 const User = require("../../src/models/user");
 const Cloudinary = require("../utils/cloudinary");
 
-const updateProfileImg = async (req, res) => {
+exports.updateProfileImg = async (req, res) => {
   try {
     if (!req.file) {
       res.send("Image file is required");
       return;
     }
+
     // Upload image to Cloudinary
     const result = await Cloudinary.uploader.upload(req.file.path, {
       folder: "Profile",
     });
 
+    // return console.log("user", req.user);
     // Update user profile image URL in the database
     const user = await User.findByIdAndUpdate(
-      req.user.id,
-      { profileImg: result.secure_url },
-      { new: true }
+      req.user.foundUserId,
+      { picture: result.secure_url },
+      { new: true, select: "picture phone_number email role isEmailVerified" }
     );
 
     return res.status(200).json({
@@ -31,8 +33,4 @@ const updateProfileImg = async (req, res) => {
       message: "Internal Server Error",
     });
   }
-};
-
-module.exports = {
-  updateProfileImg,
 };

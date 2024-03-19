@@ -11,7 +11,8 @@ const authenticate = async (req, res, next) => {
         message: "Mal formed token",
       });
     }
-    const decode = await jwt.verify(token, "AzTQ,RP)0(");
+
+    const decode = await jwt.verify(token, process.env.REFRESH_TOKEN_SECRET);
 
     req.user = decode;
     return next();

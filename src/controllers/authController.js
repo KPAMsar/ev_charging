@@ -13,10 +13,9 @@ const {
 require("dotenv").config();
 
 const generateTokens = (user) => {
-  console.log(user);
   const accessToken = jwt.sign(
     { name: user.email, role: user.role, userId: user._id },
-    "AzTQ,RP)0(",
+    process.env.ACCESS_TOKEN_SECRET,
     { expiresIn: "24h" }
   );
 
@@ -37,34 +36,42 @@ const Login = async (req, res) => {
       .json({ message: "Username and password are required." });
 
   const foundUser = await User.findOne({ email }).exec();
-  if (!foundUser) return res.sendStatus(401); //Unauthorized
+
+  if (!foundUser) return res.status(401).send("Unauthorized user"); //Unauthorized
 
   const match = await foundUser.comparePassword(password);
 
   if (match) {
-    if (match.isEmailVerified !== false) {
-      res.json({
+    if (
+      foundUser.isEmailVerified !== "true" &&
+      foundUser.isEmailVerified !== true
+    ) {
+      return res.json({
         message: "User is not verified",
       });
-      return null;
     }
+
     const role = foundUser.role;
 
     // Generate access token
     const accessToken = jwt.sign(
       {
-        UserInfo: {
-          email: foundUser.email,
-          role: role,
-        },
+        name: foundUser.email,
+        role: foundUser.role,
+        foundUserId: foundUser._id,
       },
+
       process.env.ACCESS_TOKEN_SECRET,
-      { expiresIn: "10s" }
+      { expiresIn: "1d" }
     );
 
     // Generate refresh token
     const refreshToken = jwt.sign(
-      { email: foundUser.email },
+      {
+        name: foundUser.email,
+        role: foundUser.role,
+        foundUserId: foundUser._id,
+      },
       process.env.REFRESH_TOKEN_SECRET,
       { expiresIn: "1d" }
     );
@@ -82,7 +89,8 @@ const Login = async (req, res) => {
     });
 
     // Send refresh token in response body (not recommended in production, just for demonstration)
-    res.json({ role, refreshToken });
+
+    res.json({ role, refreshToken, isAdmin: match.isAdmin });
   } else {
     res.sendStatus(401);
   }
@@ -138,7 +146,6 @@ const SignUp = async (req, res) => {
       specialChars: false,
     });
 
-    console.log("Generated token", code);
     const otpExpirationTime = new Date();
     otpExpirationTime.setMinutes(otpExpirationTime.getMinutes() + 15);
 
@@ -445,13 +452,13 @@ const ResetMyPassword = async (req, res) => {
 
     // Find the user by email and resetToken
     const user = await User.findOne({ email });
-    console.log("jjjjjjjj", user);
+
     const foundUserOTP = await OTP.findOne({
       email,
       code: resetToken,
       isValid: true,
     });
-    return console.log("FOUNDD", foundUserOTP);
+    return console.log("FOUNDD", resetToken);
     // If user not found or reset token is expired, return error
     if (!user || user.resetTokenExpiry < Date.now()) {
       return res
@@ -480,7 +487,6 @@ const ResetMyPassword = async (req, res) => {
 };
 const sendVerificationEmail = async (req, res) => {
   try {
-    // console.log("ee", req.user);
     const email = req.body.email;
     if (!email) {
       return res.json({
