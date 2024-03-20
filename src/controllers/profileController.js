@@ -36,7 +36,6 @@ exports.updateProfileImg = async (req, res) => {
 };
 
 exports.updateUserInfo = async (req, res) => {
-  console.log("herer");
   try {
     const { first_name, last_name, phone_number } = req.body;
     let pictureUrl;
@@ -59,13 +58,18 @@ exports.updateUserInfo = async (req, res) => {
     if (pictureUrl) updateObj.picture = pictureUrl;
 
     // Update user information in the database
+
     const updatedUser = await User.findByIdAndUpdate(
       req.user.foundUserId,
-      updateObj,
+      {
+        firstname: updateObj.first_name,
+        lastname: updateObj.last_name,
+        phone_number,
+        picture: updateObj.picture,
+      },
+
       {
         new: true,
-        select:
-          "first_name last_name phone_number picture email role isEmailVerified",
       }
     );
 
