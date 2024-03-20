@@ -85,9 +85,10 @@ exports.updateUserInfo = async (req, res) => {
 
 exports.getUserInfo = async (req, res) => {
   try {
-    const userInfo = await User.findById(req.user.foundUserId).select(
-      "picture _id phone_number email role isEmailVerified createdAt"
-    );
+    const userInfo = await User.findById(req.user.foundUserId)
+      .select
+      // "picture _id phone_number email role isEmailVerified createdAt"
+      ();
 
     // Check if user information exists
     if (!userInfo) {
