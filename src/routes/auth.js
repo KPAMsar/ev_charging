@@ -8,14 +8,15 @@ router.post("/login", AuthController.Login);
 router.post("/register", AuthController.SignUp);
 router.post("/checkAvailability", AuthController.CheckPhoneAndMailAvailability);
 router.post("/verify-email", AuthController.verifyEmail);
-router.post("/reset-password", AuthController.ResetPassword);
+router.post("/send-reset-password", AuthController.SendResetPasswordEmail);
 router.post("/verify-reset-password", AuthController.verifyResetPasswordOTP);
 router.post("/reset-my-password", AuthController.ResetMyPassword);
 router.post(
   "/change-password",
   Authenticate,
-  Authorize.authorizeUser(["user", "admin", "super-admin"]),
+
   AuthController.ChangePassword
 );
+router.get("/get-logged-user", Authenticate, AuthController.getLoggedInUser);
 
 module.exports = router;

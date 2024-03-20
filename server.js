@@ -11,6 +11,7 @@ const PrivacyPolicyRoutes = require("./src/routes/privacyPolicy");
 const FAQRoutes = require("./src/routes/faq");
 const TermsConditionsRoutes = require("./src/routes/terms&conditions");
 const ProfileRoutes = require("./src/routes/profile");
+const BookingRoutes = require("./src/routes/booking");
 
 const app = express();
 app.use(express.json());
@@ -35,6 +36,7 @@ app.use("/api/privacy-policy", PrivacyPolicyRoutes);
 app.use("/api/faq", FAQRoutes);
 app.use("/api/terms-conditions", TermsConditionsRoutes);
 app.use("/api/profile", ProfileRoutes);
+app.use("/api/bookings", BookingRoutes);
 
 const port = process.env.PORT;
 app.listen(port, () => {
