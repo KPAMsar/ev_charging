@@ -3,9 +3,12 @@ const logger = require("../../logger");
 
 const authorizeUser = (permissions) => {
   return (req, res, next) => {
-    const token = req.headers.authorization.split(" ")[1];
-    const decode = jwt.verify(token, "AzTQ,RP)0(");
+    const token = req.headers.authorization.split(" ");
+
+    const decode = jwt.verify(token, process.env.REFRESH_TOKEN_SECRET);
     // console.log(decode)
+    console.log("res", decode);
+
     logger.info("Authorization==>", decode);
     const user_role = decode.role;
     switch (user_role) {

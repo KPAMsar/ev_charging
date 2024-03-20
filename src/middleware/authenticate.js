@@ -4,6 +4,7 @@ const logger = require("../../logger");
 const authenticate = async (req, res, next) => {
   try {
     const token = req.headers.authorization.split(" ")[1];
+    // return console.log("token", token);
 
     if (!token) {
       logger.error("Invalid Token");
@@ -13,7 +14,7 @@ const authenticate = async (req, res, next) => {
     }
 
     const decode = await jwt.verify(token, process.env.REFRESH_TOKEN_SECRET);
-
+    // console.log("decode", decode);
     req.user = decode;
     return next();
   } catch (error) {

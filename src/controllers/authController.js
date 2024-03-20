@@ -286,7 +286,8 @@ const CheckPhoneAndMailAvailability = async (req, res) => {
   }
 };
 
-const ResetPassword = async (req, res) => {
+// USED TO SEND PASSWORD RESET OTP AFTER WHICH OTP WILL BE VERIFIED BY ANOTHER ENDPOINT
+const SendResetPasswordEmail = async (req, res) => {
   const { email } = req.body;
 
   if (!email) {
@@ -335,7 +336,7 @@ const ResetPassword = async (req, res) => {
 
   return res.status(200).json({
     success: true,
-    message: "Email verification code sent successfully.",
+    message: "Password reset code sent successfully.",
   });
 };
 
@@ -400,8 +401,8 @@ const verifyResetPasswordOTP = async (req, res) => {
 
 const ChangePassword = async (req, res) => {
   try {
-    const { userId, oldPassword, newPassword } = req.body;
-
+    const { oldPassword, newPassword } = req.body;
+    const userId = req.user.foundUserId;
     // Find the user by userId
     const user = await User.findById(userId);
 
@@ -456,9 +457,10 @@ const ResetMyPassword = async (req, res) => {
     const foundUserOTP = await OTP.findOne({
       email,
       code: resetToken,
+      type: "passwordReset",
       isValid: true,
     });
-    return console.log("FOUNDD", resetToken);
+
     // If user not found or reset token is expired, return error
     if (!user || user.resetTokenExpiry < Date.now()) {
       return res
@@ -485,6 +487,7 @@ const ResetMyPassword = async (req, res) => {
       .json({ success: false, message: "Internal Server Error" });
   }
 };
+
 const sendVerificationEmail = async (req, res) => {
   try {
     const email = req.body.email;
@@ -529,13 +532,30 @@ const sendVerificationEmail = async (req, res) => {
   }
 };
 
+const getLoggedInUser = async (req, res) => {
+  try {
+    // const loggedInUser = req.user;
+    // if (!loggedInUser) {
+    //   return res.send("User not logged in");
+    // }
+    console.log("logged in user");
+    return res.json({ success: true, user: loggedInUser });
+  } catch (error) {
+    console.error("Error retrieving logged-in user:", error);
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal Server Error" });
+  }
+};
+
 module.exports = {
   SignUp,
   Login,
   CheckPhoneAndMailAvailability,
   verifyEmail,
-  ResetPassword,
+  SendResetPasswordEmail,
   verifyResetPasswordOTP,
   ChangePassword,
   ResetMyPassword,
+  getLoggedInUser,
 };
