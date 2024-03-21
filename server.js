@@ -12,6 +12,9 @@ const FAQRoutes = require("./src/routes/faq");
 const TermsConditionsRoutes = require("./src/routes/terms&conditions");
 const ProfileRoutes = require("./src/routes/profile");
 const BookingRoutes = require("./src/routes/booking");
+const ChargingPointRoutes = require("./src/routes/chargingPoint");
+const ConnectionTypeRoutes = require("./src/routes/connectionType");
+const AmenityRoutes = require("./src/routes/amenity");
 
 const app = express();
 app.use(express.json());
@@ -37,6 +40,9 @@ app.use("/api/faq", FAQRoutes);
 app.use("/api/terms-conditions", TermsConditionsRoutes);
 app.use("/api/profile", ProfileRoutes);
 app.use("/api/bookings", BookingRoutes);
+app.use("/api/charging-point", ChargingPointRoutes);
+app.use("/api/connection-type", ConnectionTypeRoutes);
+app.use("/api/amenity", AmenityRoutes);
 
 const port = process.env.PORT;
 app.listen(port, () => {
