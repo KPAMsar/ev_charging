@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const UserController = require("../controllers/userController");
+const UserController = require("../controllers/userActivityController");
 const UserActivityController = require("../controllers/userActivityController");
 const Authenticated = require("../middleware/authenticate");
 
@@ -14,7 +14,7 @@ router.post(
 router.get(
   "/user-activity-logs",
   Authenticated,
-  UserActivityController.getAllUserActivityLogs
+  UserActivityController.logUserActivity
 );
 
 // User Management Routes
