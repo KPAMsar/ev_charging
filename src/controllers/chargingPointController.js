@@ -85,11 +85,30 @@ exports.getChargingPointById = async (req, res) => {
 exports.updateChargingPoint = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, location, connectionType } = req.body;
+    const { name, location, connectionType, amenities } = req.body;
+    let pictureUrl = null;
+
+    if (req.file) {
+      // Upload image to Cloudinary
+      const result = await Cloudinary.uploader.upload(req.file.path, {
+        folder: "ChargingPoint",
+      });
+
+      pictureUrl = result;
+    }
 
     const chargingPoint = await ChargingPoint.findByIdAndUpdate(
       id,
-      { name, location, connectionType },
+      {
+        name,
+        location,
+        connectionType,
+        amenities,
+        picture: {
+          public_id: pictureUrl.public_id,
+          url: pictureUrl.secure_url,
+        },
+      },
       { new: true }
     );
 
