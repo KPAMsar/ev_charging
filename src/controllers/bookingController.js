@@ -48,10 +48,13 @@ exports.createBooking = async (req, res) => {
 
 exports.getAllBookings = async (req, res) => {
   try {
-    const bookings = await BookingSlot.find();
-    return res
-      .json(bookings)
-      .populate("vehicleType vehicleModel connectionType price");
+    const bookings = await BookingSlot.find()
+      .populate("vehicleType")
+      .populate("vehicleModel")
+      .populate("connectionType")
+      .populate("price");
+
+    return res.json(bookings);
   } catch (error) {
     console.error(error);
     return res
