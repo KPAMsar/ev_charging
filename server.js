@@ -16,6 +16,10 @@ const ChargingPointRoutes = require("./src/routes/chargingPoint");
 const ConnectionTypeRoutes = require("./src/routes/connectionType");
 const AmenityRoutes = require("./src/routes/amenity");
 const FavouriteChargingPointRoutes = require("./src/routes/favouriteChargingPoint");
+const UserActivityRoutes = require("./src/routes/userActivity");
+const PricesRoutes = require("./src/routes/price");
+const VehicleTypeRoutes = require("./src/routes/vehicleType");
+const VehicleModelRoutes = require("./src/routes/vehicleModel");
 
 const app = express();
 app.use(express.json());
@@ -45,6 +49,10 @@ app.use("/api/charging-point", ChargingPointRoutes);
 app.use("/api/connection-type", ConnectionTypeRoutes);
 app.use("/api/amenity", AmenityRoutes);
 app.use("/api/favourite-point", FavouriteChargingPointRoutes);
+app.use("/api/user-activity", UserActivityRoutes);
+app.use("/api/prices", PricesRoutes);
+app.use("/api/vehicle-type", VehicleTypeRoutes);
+app.use("/api/vehicle-model", VehicleModelRoutes);
 
 const port = process.env.PORT;
 app.listen(port, () => {

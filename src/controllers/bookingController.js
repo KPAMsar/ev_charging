@@ -1,29 +1,42 @@
-const Booking = require("../models/Booking");
+const BookingSlot = require("../models/BookingSlot");
 
 exports.createBooking = async (req, res) => {
   try {
     const {
-      connection_type,
-      vehicle_type,
-      vehicle_model,
-      description,
-      location,
+      vehicleType,
+      vehicleModel,
+      connectionType,
+      schedule,
+      date,
+      time,
+      price,
     } = req.body;
-    if (!connection_type || !vehicle_type || !vehicle_model) {
+    if (
+      !vehicleType ||
+      !vehicleModel ||
+      !connectionType ||
+      !schedule ||
+      !date ||
+      !time ||
+      !price
+    ) {
       return res.status(400).json({
         success: false,
-        message:
-          "Connection type, vehicle type, and vehicle model are required",
+        message: "All fields are required",
       });
     }
-    const newBooking = new Booking({
-      connection_type,
-      vehicle_type,
-      vehicle_model,
-      description,
-      location,
+
+    const newBooking = new BookingSlot({
+      vehicleType,
+      vehicleModel,
+      connectionType,
+      schedule,
+      date,
+      time,
+      price,
     });
     await newBooking.save();
+
     return res.status(201).json({ success: true, booking: newBooking });
   } catch (error) {
     console.error(error);
@@ -35,8 +48,10 @@ exports.createBooking = async (req, res) => {
 
 exports.getAllBookings = async (req, res) => {
   try {
-    const bookings = await Booking.find();
-    return res.json(bookings);
+    const bookings = await BookingSlot.find();
+    return res
+      .json(bookings)
+      .populate("vehicleType vehicleModel connectionType price");
   } catch (error) {
     console.error(error);
     return res
@@ -53,7 +68,7 @@ exports.getBookingById = async (req, res) => {
         .status(400)
         .json({ success: false, message: "ID is required" });
     }
-    const booking = await Booking.findById(id);
+    const booking = await BookingSlot.findById(id);
     if (!booking) {
       return res
         .status(404)
@@ -72,24 +87,40 @@ exports.updateBooking = async (req, res) => {
   try {
     const { id } = req.params;
     const {
-      connection_type,
-      vehicle_type,
-      vehicle_model,
-      description,
-      location,
+      vehicleType,
+      vehicleModel,
+      connectionType,
+      schedule,
+      date,
+      time,
+      price,
     } = req.body;
-    if (!id || !connection_type || !vehicle_type || !vehicle_model) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message:
-            "ID, connection type, vehicle type, and vehicle model are required",
-        });
+    if (
+      !id ||
+      !vehicleType ||
+      !vehicleModel ||
+      !connectionType ||
+      !schedule ||
+      !date ||
+      !time ||
+      !price
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "All fields are required",
+      });
     }
-    const updatedBooking = await Booking.findByIdAndUpdate(
+    const updatedBooking = await BookingSlot.findByIdAndUpdate(
       id,
-      { connection_type, vehicle_type, vehicle_model, description, location },
+      {
+        vehicleType,
+        vehicleModel,
+        connectionType,
+        schedule,
+        date,
+        time,
+        price,
+      },
       { new: true }
     );
     if (!updatedBooking) {
@@ -114,7 +145,7 @@ exports.deleteBooking = async (req, res) => {
         .status(400)
         .json({ success: false, message: "ID is required" });
     }
-    const deletedBooking = await Booking.findByIdAndDelete(id);
+    const deletedBooking = await BookingSlot.findByIdAndDelete(id);
     if (!deletedBooking) {
       return res
         .status(404)
