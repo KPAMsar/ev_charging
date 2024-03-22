@@ -15,6 +15,7 @@ const BookingRoutes = require("./src/routes/booking");
 const ChargingPointRoutes = require("./src/routes/chargingPoint");
 const ConnectionTypeRoutes = require("./src/routes/connectionType");
 const AmenityRoutes = require("./src/routes/amenity");
+const FavouriteChargingPointRoutes = require("./src/routes/favouriteChargingPoint");
 
 const app = express();
 app.use(express.json());
@@ -43,6 +44,7 @@ app.use("/api/bookings", BookingRoutes);
 app.use("/api/charging-point", ChargingPointRoutes);
 app.use("/api/connection-type", ConnectionTypeRoutes);
 app.use("/api/amenity", AmenityRoutes);
+app.use("/api/favourite-point", FavouriteChargingPointRoutes);
 
 const port = process.env.PORT;
 app.listen(port, () => {

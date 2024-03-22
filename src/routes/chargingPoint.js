@@ -16,14 +16,15 @@ router.post(
 router.get("/", ChargingPointController.getAllChargingPoints);
 
 // Get a charging point by ID
-router.get(
-  "/:id",
-
-  ChargingPointController.deleteChargingPointById
-);
+router.get("/:id", Authenticated, ChargingPointController.getChargingPointById);
 
 // Update a charging point by ID
-router.put("/:id", Authenticated, ChargingPointController.updateChargingPoint);
+router.put(
+  "/:id",
+  upload.single("file"),
+  Authenticated,
+  ChargingPointController.updateChargingPoint
+);
 
 // Delete a charging point by ID
 router.delete(
