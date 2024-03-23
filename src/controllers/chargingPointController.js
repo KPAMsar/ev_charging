@@ -4,7 +4,7 @@ const Cloudinary = require("../utils/cloudinary");
 // Create a new charging point
 exports.createChargingPoint = async (req, res) => {
   try {
-    const { name, location, connectionType } = req.body;
+    const { name, location, connectionType, amenities } = req.body;
 
     if (!name || !location || !connectionType) {
       return res.status(400).json({
@@ -12,6 +12,7 @@ exports.createChargingPoint = async (req, res) => {
         message: "Name, location, and connection type are required",
       });
     }
+
     let pictureUrl = null;
 
     if (req.file) {
@@ -27,6 +28,7 @@ exports.createChargingPoint = async (req, res) => {
       name,
       location,
       connectionType,
+      amenities,
       picture: {
         public_id: pictureUrl.public_id,
         url: pictureUrl.secure_url,
@@ -48,7 +50,11 @@ exports.createChargingPoint = async (req, res) => {
 // Get all charging points
 exports.getAllChargingPoints = async (req, res) => {
   try {
-    const chargingPoints = await ChargingPoint.find();
+    const chargingPoints = await ChargingPoint.find()
+      .populate("amenities")
+      .populate("connectionType")
+      .populate("reviews");
+
     return res.status(200).json({ success: true, chargingPoints });
   } catch (error) {
     console.error(error);
@@ -62,16 +68,30 @@ exports.getAllChargingPoints = async (req, res) => {
 exports.getChargingPointById = async (req, res) => {
   try {
     const { id } = req.params;
+
+    // Check if the ID parameter is provided
+    if (!id) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Charging point ID is required" });
+    }
+
+    // Find the charging point by ID and populate its related fields
     const chargingPoint = await ChargingPoint.findById(id)
       .populate("amenities")
-      .populate("connectionType");
-
+      .populate("connectionType")
+      .populate({
+        path: "reviews",
+        match: { chargingPoint: id },
+      });
+    // Check if the charging point exists
     if (!chargingPoint) {
       return res
         .status(404)
         .json({ success: false, message: "Charging point not found" });
     }
 
+    // Return the charging point details
     return res.status(200).json({ success: true, chargingPoint });
   } catch (error) {
     console.error(error);
