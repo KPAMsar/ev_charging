@@ -2,28 +2,23 @@ const BookingSlot = require("../models/BookingSlot");
 
 exports.createBooking = async (req, res) => {
   try {
-    const {
-      vehicleType,
-      vehicleModel,
-      connectionType,
-      schedule,
-      date,
-      time,
-      price,
-    } = req.body;
-    if (
-      !vehicleType ||
-      !vehicleModel ||
-      !connectionType ||
-      !schedule ||
-      !date ||
-      !time ||
-      !price
-    ) {
-      return res.status(400).json({
-        success: false,
-        message: "All fields are required",
-      });
+    const requiredFields = [
+      "vehicleType",
+      "vehicleModel",
+      "connectionType",
+      "schedule",
+      "date",
+      "time",
+      "price",
+    ];
+
+    for (let field of requiredFields) {
+      if (!req.body[field]) {
+        return res.status(400).json({
+          success: false,
+          message: `${field} is required`,
+        });
+      }
     }
 
     const newBooking = new BookingSlot({

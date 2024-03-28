@@ -2,10 +2,10 @@ const Review = require("../models/Review");
 const ChargingPoint = require("../models/ChargingPoint");
 
 // Create a review
-// Create a review
 exports.createReview = async (req, res) => {
   try {
-    const { chargingPointId, userId, rating, comment } = req.body;
+    const userId = req.user.foundUserId;
+    const { chargingPointId, rating, comment } = req.body;
     if (!chargingPointId || !userId || !rating || !comment) {
       return res.status(400).json({
         success: false,

@@ -77,3 +77,34 @@ exports.removeFromFavourites = async (req, res) => {
     res.status(500).json({ success: false, error: error.message });
   }
 };
+
+exports.getUserFavourites = async (req, res) => {
+  const userId = req.user.foundUserId;
+
+  if (!userId) {
+    return res.status(401).json({
+      success: false,
+      message: "Unauthorized, you need to login",
+    });
+  }
+
+  try {
+    const favourite = await Favourite.findOne({ user: userId }).populate(
+      "chargingPoints"
+    );
+
+    if (!favourite) {
+      return res.status(404).json({
+        success: false,
+        message: "Favourites not found for this user",
+      });
+    }
+
+    res.json({
+      success: true,
+      data: favourite,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+};

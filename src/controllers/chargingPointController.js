@@ -51,10 +51,7 @@ exports.createChargingPoint = async (req, res) => {
 exports.getAllChargingPoints = async (req, res) => {
   try {
     const chargingPoints = await ChargingPoint.find()
-      .populate("amenities")
-      .populate("connectionType")
-      .populate("reviews");
-
+    .populate("amenities connectionType reviews");
     return res.status(200).json({ success: true, chargingPoints });
   } catch (error) {
     console.error(error);
