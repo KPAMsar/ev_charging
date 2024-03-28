@@ -18,20 +18,20 @@ router.get(
 );
 
 // User Management Routes
-router.get("/users", Authenticated, UserController.listUsers);
+router.get("/", Authenticated, UserController.listUsers);
 
-router.post("/users", Authenticated, UserController.addUser);
+router.post("/", Authenticated, UserController.addUser);
 
-router.get("/users/:userId", Authenticated, UserController.viewUser);
+router.get("/:userId", Authenticated, UserController.viewUser);
 
-router.put("/users/:userId", Authenticated, UserController.editUser);
+router.put("/:userId", Authenticated, UserController.editUser);
 
 router.put(
-  "/users/:userId/toggle-status",
+  "/:userId/toggle-status",
   Authenticated,
   UserController.toggleUserStatus
 );
 
-router.delete("/users/:userId", Authenticated, UserController.deleteUser);
+router.delete("/:userId", Authenticated, UserController.deleteUser);
 
 module.exports = router;

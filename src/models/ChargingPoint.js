@@ -33,6 +33,7 @@ const chargingPointSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  reviews: [{ type: mongoose.Schema.Types.ObjectId, ref: "Review" }],
   picture: {
     public_id: {
       type: String,

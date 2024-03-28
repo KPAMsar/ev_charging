@@ -17,13 +17,19 @@ const logUserActivity = async (userId, activity) => {
 };
 
 // Function to list all users
-const listUsers = async () => {
+const listUsers = async (req, res) => {
   try {
-    const users = await User.find();
-    return users;
+    const users = await User.find({}, { password: 0, refreshToken: 0 });
+    return res.json({
+      success: true,
+      message: "Users listed successfully",
+      users,
+    });
   } catch (error) {
     console.error("Error listing users:", error);
-    return [];
+    return res
+      .status(500)
+      .json({ success: false, message: "Failed to list users" });
   }
 };
 
