@@ -28,6 +28,10 @@ const userSchema = new mongoose.Schema(
       enum: ["admin", "user", "super-admin"],
       default: "user",
     },
+    isDisabled: {
+      type: Boolean,
+      default: false,
+    },
     password: String,
     isEmailVerified: {
       type: String,

@@ -21,6 +21,7 @@ const PricesRoutes = require("./src/routes/price");
 const VehicleTypeRoutes = require("./src/routes/vehicleType");
 const VehicleModelRoutes = require("./src/routes/vehicleModel");
 const ReviewRoutes = require("./src/routes/review");
+const AdminRoutes = require("./src/routes/adminUser");
 
 const app = express();
 app.use(express.json());
@@ -55,6 +56,7 @@ app.use("/api/prices", PricesRoutes);
 app.use("/api/vehicle-type", VehicleTypeRoutes);
 app.use("/api/vehicle-model", VehicleModelRoutes);
 app.use("/api/review", ReviewRoutes);
+app.use("/api/admin-user", AdminRoutes);
 
 const port = process.env.PORT;
 app.listen(port, () => {
