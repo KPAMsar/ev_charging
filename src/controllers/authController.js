@@ -249,6 +249,66 @@ const verifyEmail = async (req, res) => {
   }
 };
 
+const adminVerifyEmail = async (req, res) => {
+  try {
+    const { email, code } = req.body;
+
+    if (!email || !code) {
+      return res.status(400).json({
+        success: false,
+        message: "Email and verification code are required",
+      });
+    }
+
+    // Find the user based on the provided email
+    const user = await User.findOne({ email: email.toLowerCase().trim() });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found for the provided email",
+      });
+    }
+
+    // Find the corresponding OTP record for the user and the provided code
+    const otpRecord = await OTP.findOne({
+      email: email,
+      code,
+      type: "emailVerification",
+      isValid: true,
+    });
+
+    if (!otpRecord || otpRecord.expiresIn < new Date()) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid or expired verification code",
+      });
+    }
+
+    otpRecord.isValid = false;
+    await otpRecord.save();
+
+    user.isEmailVerified = true;
+    user.role = "admin";
+    await user.save();
+
+    // Delete the used OTP record
+    await otpRecord.deleteOne();
+    // sendSuccessRegEmail();
+    return res.status(200).json({
+      success: true,
+      message: "Email verified successful",
+    });
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      success: false,
+      message: "Something went wrong",
+    });
+  }
+};
+
 const CheckPhoneAndMailAvailability = async (req, res) => {
   try {
     const { email, phone_number } = req.body;
@@ -558,4 +618,5 @@ module.exports = {
   ChangePassword,
   ResetMyPassword,
   getLoggedInUser,
+  adminVerifyEmail,
 };

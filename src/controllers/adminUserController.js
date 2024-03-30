@@ -99,9 +99,10 @@ exports.adminSignUp = async (req, res) => {
   }
 };
 
-exports.adminVerifyEmail = async (req, res) => {
+const adminVerifyEmail = async (req, res, email, code) => {
+  console.log("heeheheheh");
   try {
-    const { email, code } = req.body;
+    // const { email, code } = req.body;
 
     if (!email || !code) {
       return res.status(400).json({
@@ -159,7 +160,7 @@ exports.adminVerifyEmail = async (req, res) => {
   }
 };
 
-exports.disableAdmin = async (req, res) => {
+const disableAdmin = async (req, res) => {
   try {
     const userId = req.body.userId;
     const user = await User.findById(userId);
@@ -174,7 +175,7 @@ exports.disableAdmin = async (req, res) => {
   }
 };
 
-exports.getAllAdmins = async (req, res) => {
+const getAllAdmins = async (req, res) => {
   try {
     const admins = await User.find({ role: "admin" });
     return res.json({ success: true, admins });
@@ -185,3 +186,5 @@ exports.getAllAdmins = async (req, res) => {
       .json({ success: false, message: "Internal Server Error" });
   }
 };
+
+module.exports = { adminVerifyEmail, disableAdmin, getAllAdmins };
