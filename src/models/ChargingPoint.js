@@ -9,6 +9,14 @@ const chargingPointSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  longitude: {
+    type: Number,
+    required: true,
+  },
+  latitude: {
+    type: Number,
+    required: true,
+  },
   amenities: [
     {
       type: mongoose.Schema.Types.ObjectId,

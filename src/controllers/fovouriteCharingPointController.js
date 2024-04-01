@@ -3,18 +3,21 @@ const Favourite = require("../models/FavouriteChargingPoint");
 exports.addToFavourites = async (req, res) => {
   const { chargingPointId } = req.body;
   const userId = req.user.foundUserId;
+
   if (!userId) {
-    return res.send(401).json({
+    return res.status(401).json({
       success: false,
-      message: "Unathorized, you need to login",
+      message: "Unauthorized, you need to login",
     });
   }
+
   if (!chargingPointId) {
     return res.status(400).json({
       success: false,
       message: "Charging point ID is required",
     });
   }
+
   try {
     let favourite = await Favourite.findOne({ user: userId });
 
@@ -25,13 +28,24 @@ exports.addToFavourites = async (req, res) => {
         chargingPoints: [chargingPointId],
       });
       await favourite.save();
-    } else {
-      // Add the charging point to existing favourites
-      favourite.chargingPoints.push(chargingPointId);
-      await favourite.save();
+      return res
+        .status(201)
+        .json({ success: true, message: "Charging point added to favourites" });
     }
 
-    res
+    // Check if the charging point already exists in the user's favourites
+    if (favourite.chargingPoints.includes(chargingPointId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Charging point already added to favourites",
+      });
+    }
+
+    // Add the charging point to existing favourites
+    favourite.chargingPoints.push(chargingPointId);
+    await favourite.save();
+
+    return res
       .status(201)
       .json({ success: true, message: "Charging point added to favourites" });
   } catch (error) {
@@ -41,37 +55,37 @@ exports.addToFavourites = async (req, res) => {
 
 exports.removeFromFavourites = async (req, res) => {
   const { chargingPointId } = req.body;
-
   const userId = req.user.foundUserId;
 
   if (!userId) {
-    return res.send(401).json({
+    return res.status(401).json({
       success: false,
-      message: "Unathorized, you need to login",
+      message: "Unauthorized, you need to login",
     });
   }
+
   if (!chargingPointId) {
     return res.status(400).json({
       success: false,
       message: "Charging point ID is required",
     });
   }
+
   try {
-    const favourite = await Favourite.findOne({ user: userId });
+    const favourite = await Favourite.findOneAndDelete({
+      user: userId,
+      chargingPoints: chargingPointId,
+    });
 
     if (!favourite) {
       return res
         .status(404)
-        .json({ success: false, message: "Favourites not found" });
+        .json({ success: false, message: "Favorites not found" });
     }
-
-    // Remove the charging point from favourites
-    favourite.chargingPoints.pull(chargingPointId);
-    await favourite.save();
 
     res.json({
       success: true,
-      message: "Charging point removed from favourites",
+      message: "Charging point removed from favorites",
     });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
