@@ -4,12 +4,14 @@ const Cloudinary = require("../utils/cloudinary");
 // Create a new charging point
 exports.createChargingPoint = async (req, res) => {
   try {
-    const { name, location, connectionType, amenities } = req.body;
+    const { name, location, connectionType, amenities, longitude, latitude } =
+      req.body;
 
-    if (!name || !location || !connectionType) {
+    if (!name || !location || !connectionType || !longitude || !latitude) {
       return res.status(400).json({
         success: false,
-        message: "Name, location, and connection type are required",
+        message:
+          "Name, location, connection type, longitude, and latitude are required",
       });
     }
 
@@ -27,18 +29,19 @@ exports.createChargingPoint = async (req, res) => {
     const newChargingPoint = new ChargingPoint({
       name,
       location,
+      longitude,
+      latitude,
       connectionType,
       amenities,
       picture: {
-        public_id: pictureUrl.public_id,
-        url: pictureUrl.secure_url,
+        public_id: pictureUrl ? pictureUrl.public_id : null,
+        url: pictureUrl ? pictureUrl.secure_url : null,
       },
     });
+
     const savedData = await newChargingPoint.save();
 
-    return res
-      .status(201)
-      .json({ success: true, chargingPoint: newChargingPoint });
+    return res.status(201).json({ success: true, chargingPoint: savedData });
   } catch (error) {
     console.error(error);
     return res
@@ -50,8 +53,9 @@ exports.createChargingPoint = async (req, res) => {
 // Get all charging points
 exports.getAllChargingPoints = async (req, res) => {
   try {
-    const chargingPoints = await ChargingPoint.find()
-    .populate("amenities connectionType reviews");
+    const chargingPoints = await ChargingPoint.find().populate(
+      "amenities connectionType reviews"
+    );
     return res.status(200).json({ success: true, chargingPoints });
   } catch (error) {
     console.error(error);

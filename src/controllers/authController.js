@@ -37,7 +37,10 @@ const Login = async (req, res) => {
 
   const foundUser = await User.findOne({ email }).exec();
 
-  if (!foundUser) return res.status(401).send("Unauthorized user"); //Unauthorized
+  if (!foundUser)
+    return res
+      .status(401)
+      .json({ success: false, message: "Unauthorized user" });
 
   const match = await foundUser.comparePassword(password);
 
@@ -54,19 +57,19 @@ const Login = async (req, res) => {
     const role = foundUser.role;
 
     // Generate access token
-    const accessToken = jwt.sign(
-      {
-        name: foundUser.email,
-        role: foundUser.role,
-        foundUserId: foundUser._id,
-      },
+    // const accessToken = jwt.sign(
+    //   {
+    //     name: foundUser.email,
+    //     role: foundUser.role,
+    //     foundUserId: foundUser._id,
+    //   },
 
-      process.env.ACCESS_TOKEN_SECRET,
-      { expiresIn: "1d" }
-    );
+    //   process.env.ACCESS_TOKEN_SECRET,
+    //   { expiresIn: "1d" }
+    // );
 
-    // Generate refresh token
-    const refreshToken = jwt.sign(
+    // Generate token
+    const acessToken = jwt.sign(
       {
         name: foundUser.email,
         role: foundUser.role,
@@ -77,20 +80,20 @@ const Login = async (req, res) => {
     );
 
     // Save refresh token with current user
-    foundUser.refreshToken.push(refreshToken);
+    // foundUser.refreshToken.push(refreshToken);
     await foundUser.save();
 
     // Set access token as a cookie
-    res.cookie("accessToken", accessToken, {
-      httpOnly: true,
-      secure: true,
-      sameSite: "None",
-      maxAge: 10 * 1000, // 10 seconds for demonstration purposes, change as needed
-    });
+    // res.cookie("accessToken", accessToken, {
+    //   httpOnly: true,
+    //   secure: true,
+    //   sameSite: "None",
+    //   maxAge: 10 * 1000, // 10 seconds for demonstration purposes, change as needed
+    // });
 
     // Send refresh token in response body (not recommended in production, just for demonstration)
 
-    res.json({ role, refreshToken, accessToken, isAdmin: match.isAdmin });
+    res.json({ role, acessToken, isAdmin: match.isAdmin });
   } else {
     res.sendStatus(401);
   }
