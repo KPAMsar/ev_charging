@@ -33,4 +33,10 @@ router.delete(
   ChargingPointController.deleteChargingPointById
 );
 
+router.post(
+  "/near-by",
+  Authenticated,
+  ChargingPointController.getNearByChargingPoints
+);
+
 module.exports = router;
