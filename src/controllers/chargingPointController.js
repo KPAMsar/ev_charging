@@ -173,9 +173,7 @@ exports.deleteChargingPointById = async (req, res) => {
 
 exports.getNearByChargingPoints = async (req, res) => {
   const { latitude, longitude } = req.body;
-
   const radius = 10;
-
   try {
     const allChargingPoints = await ChargingPoint.find();
 
