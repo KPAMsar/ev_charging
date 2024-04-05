@@ -92,7 +92,7 @@ const Login = async (req, res) => {
     // });
 
     // Send refresh token in response body (not recommended in production, just for demonstration)
-
+    console.log("tonen", acessToken);
     res.json({ role, acessToken, isAdmin: match.isAdmin });
   } else {
     res.sendStatus(401);
