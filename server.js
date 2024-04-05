@@ -5,6 +5,8 @@ const passport = require("passport");
 const session = require("express-session");
 const cors = require("cors");
 const AppRoutes = require("./src/routes/app");
+const morgan = require("morgan");
+
 // const GoogleAuthRouter = require("./src/routes/goggle-auth");
 const AuthRoutes = require("./src/routes/auth");
 const PrivacyPolicyRoutes = require("./src/routes/privacyPolicy");
@@ -34,6 +36,8 @@ app.use(
     saveUninitialized: false,
   })
 );
+
+app.use(morgan("dev"));
 
 // Initialize Passport
 app.use(passport.initialize());
