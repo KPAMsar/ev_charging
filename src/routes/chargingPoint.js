@@ -38,8 +38,8 @@ router.post(
   Authenticated,
   ChargingPointController.getNearByChargingPoints
 );
-router.post(
-  "/approve",
+router.patch(
+  "/approve/:id",
   Authenticated,
   ChargingPointController.approveChargingPoint
 );

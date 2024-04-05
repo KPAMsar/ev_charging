@@ -222,25 +222,29 @@ exports.approveChargingPoint = async (req, res) => {
         message: "ID is required",
       });
     }
-    foundID = ChargingPoint.find({ _id: id });
-    if (!foundID) {
+
+    const updatedChargingPoint = await ChargingPoint.findOneAndUpdate(
+      { _id: id },
+      { $set: { status: "approved" } },
+      { new: true }
+    );
+
+    if (!updatedChargingPoint) {
       return res.json({
         success: false,
-        message: "ID not found",
+        message: "Charging point not found",
       });
     }
 
-    foundID.approved = true;
-    foundId.save();
-    res.json({
+    return res.json({
       success: true,
-      message: "Saved succesfully",
-      data: foundID,
+      message: "Charging point approved successfully",
+      data: updatedChargingPoint,
     });
   } catch (error) {
     return res.json({
       success: false,
-      message: "An error occured",
+      message: "An error occurred",
       error: error.message,
     });
   }
