@@ -3,41 +3,49 @@ const logger = require("../../logger");
 
 const authorizeUser = (permissions) => {
   return (req, res, next) => {
-    const token = req.headers.authorization.split(" ");
+    try {
+      const authHeader = req.headers.authorization;
 
-    const decode = jwt.verify(token, process.env.REFRESH_TOKEN_SECRET);
-    // console.log(decode)
-    console.log("res", decode);
+      if (!authHeader || !authHeader.startsWith("Bearer ")) {
+        logger.error("Invalid Token: Token not provided");
+        return res.status(401).json({
+          message: "Token not provided",
+        });
+      }
 
-    logger.info("Authorization==>", decode);
-    const user_role = decode.role;
-    switch (user_role) {
-      case "user":
-        if (permissions.includes(user_role)) {
-          next();
-        } else {
-          return res.status(401).json("You are not authorized!");
-        }
-        break;
+      const token = authHeader.split(" ")[1];
 
-      case "admin":
-        if (permissions.includes(user_role)) {
-          next();
-        } else {
-          return res.status(401).json("You are not authorized!");
-        }
-        break;
-      case "super-admin":
-        if (permissions.includes(user_role)) {
-          next();
-        } else {
-          return res.status(401).json("You are not authorized!");
-        }
-        break;
-      default:
-        return res.status(400).json("Bad Request!");
+      if (!token) {
+        logger.error("Invalid Token: Malformed token");
+        return res.status(401).json({
+          message: "Malformed token",
+        });
+      }
+
+      const decoded = jwt.verify(token, process.env.REFRESH_TOKEN_SECRET);
+
+      logger.info("Authorization==>", decoded);
+      const userRole = decoded.role;
+
+      logger.info("Authorization==> User Role:", userRole);
+
+      if (!userRole || !permissions.includes(userRole)) {
+        return res.status(403).json("You are not authorized!");
+      }
+
+      req.user = decoded;
+      next();
+    } catch (error) {
+      logger.error("Authorization Error:", error.message);
+      return res.status(403).json({
+        message: "Authorization Failed!",
+      });
     }
   };
+};
+
+module.exports = {
+  authorizeUser,
 };
 
 module.exports = {

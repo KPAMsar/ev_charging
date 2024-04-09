@@ -60,3 +60,10 @@
 {"level":"error","message":"Invalid Token: Token not provided"}
 {"level":"error","message":"Invalid Token: Token not provided"}
 {"level":"error","message":"Invalid Token: Token not provided"}
+{"exp":1712748497,"foundUserId":"65f8cdd1ca13fd1483ccb784","iat":1712662097,"level":"info","message":"Authorization==>","name":"kpamdev@gmail.com","role":"admin"}
+{"exp":1712748497,"foundUserId":"65f8cdd1ca13fd1483ccb784","iat":1712662097,"level":"info","message":"Authorization==>","name":"kpamdev@gmail.com","role":"admin"}
+{"exp":1712748497,"foundUserId":"65f8cdd1ca13fd1483ccb784","iat":1712662097,"level":"info","message":"Authorization==>","name":"kpamdev@gmail.com","role":"admin"}
+{"level":"info","message":"role==>"}
+{"exp":1712748497,"foundUserId":"65f8cdd1ca13fd1483ccb784","iat":1712662097,"level":"info","message":"Authorization==>","name":"kpamdev@gmail.com","role":"admin"}
+{"level":"info","message":"Authorization==> User Role:"}
+{"exp":1712748497,"foundUserId":"65f8cdd1ca13fd1483ccb784","iat":1712662097,"level":"info","message":"Authorization==>","name":"kpamdev@gmail.com","role":"admin"}
