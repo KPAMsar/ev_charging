@@ -19,7 +19,7 @@ router.get("/", faqController.getAllFAQs);
 router.get("/:id", faqController.getFAQById);
 
 // Update a FAQ
-router.put(
+router.patch(
   "/:id",
   Authenticated,
   Authorize.authorizeUser(["admin", "super-admin"]),

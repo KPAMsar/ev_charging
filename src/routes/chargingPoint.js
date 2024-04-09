@@ -38,5 +38,10 @@ router.post(
   Authenticated,
   ChargingPointController.getNearByChargingPoints
 );
+router.patch(
+  "/approve/:id",
+  Authenticated,
+  ChargingPointController.approveChargingPoint
+);
 
 module.exports = router;

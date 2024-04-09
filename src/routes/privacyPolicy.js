@@ -6,7 +6,7 @@ const PrivacyPolicyController = require("../controllers/privacyPolicyController"
 
 router.post(
   "/",
-  Authorize.authorizeUser(["admin", "super-admin"]),
+
   Authenticated,
   PrivacyPolicyController.createPrivacyPolicy
 );
@@ -15,14 +15,14 @@ router.get("/", PrivacyPolicyController.getAllPrivacyPolicies);
 
 router.put(
   "/:id",
-  Authorize.authorizeUser(["admin", "super-admin"]),
+
   Authenticated,
   PrivacyPolicyController.updatePrivacyPolicy
 );
 
 router.delete(
   "/:id",
-  Authorize.authorizeUser(["admin", "super-admin"]),
+
   Authenticated,
   PrivacyPolicyController.deletePrivacyPolicy
 );

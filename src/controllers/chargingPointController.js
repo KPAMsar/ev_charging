@@ -212,3 +212,40 @@ const calculateDistance = (lat1, lon1, lat2, lon2) => {
   const distance = R * c;
   return distance;
 };
+
+exports.approveChargingPoint = async (req, res) => {
+  try {
+    const id = req.params.id;
+    if (!id) {
+      return res.json({
+        success: false,
+        message: "ID is required",
+      });
+    }
+
+    const updatedChargingPoint = await ChargingPoint.findOneAndUpdate(
+      { _id: id },
+      { $set: { status: "approved" } },
+      { new: true }
+    );
+
+    if (!updatedChargingPoint) {
+      return res.json({
+        success: false,
+        message: "Charging point not found",
+      });
+    }
+
+    return res.json({
+      success: true,
+      message: "Charging point approved successfully",
+      data: updatedChargingPoint,
+    });
+  } catch (error) {
+    return res.json({
+      success: false,
+      message: "An error occurred",
+      error: error.message,
+    });
+  }
+};
