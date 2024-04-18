@@ -78,7 +78,7 @@ exports.getChargingPointById = async (req, res) => {
     }
 
     // Find the charging point by ID and populate its related fields
-    const chargingPoint = await ChargingPoint.findById(id)
+    const chargingPoint = await ChargingPoint.findOne({ _id: id })
       .populate("amenities")
       .populate("connectionType")
       .populate({
@@ -171,31 +171,25 @@ exports.deleteChargingPointById = async (req, res) => {
   }
 };
 
-exports.getNearByChargingPoints = async (req, res) => {
-  const { latitude, longitude } = req.body;
-  const radius = 10;
-  try {
-    const allChargingPoints = await ChargingPoint.find();
+//     const nearChargingPoints = allChargingPoints.filter((chargingPoint) => {
+//       const distance = calculateDistance(
+//         latitude,
+//         longitude,
+//         chargingPoint.latitude,
+//         chargingPoint.longitude
+//       );
+//       return distance <= radius;
+//     });
 
-    const nearChargingPoints = allChargingPoints.filter((chargingPoint) => {
-      const distance = calculateDistance(
-        latitude,
-        longitude,
-        chargingPoint.latitude,
-        chargingPoint.longitude
-      );
-      return distance <= radius;
-    });
-
-    res.json({ success: true, data: nearChargingPoints });
-  } catch (error) {
-    console.error("Error fetching or filtering charging points:", error);
-    res.status(500).json({
-      success: false,
-      message: "An error occurred while fetching or filtering charging points",
-    });
-  }
-};
+//     res.json({ success: true, data: nearChargingPoints });
+//   } catch (error) {
+//     console.error("Error fetching or filtering charging points:", error);
+//     res.status(500).json({
+//       success: false,
+//       message: "An error occurred while fetching or filtering charging points",
+//     });
+//   }
+// };
 
 const calculateDistance = (lat1, lon1, lat2, lon2) => {
   const R = 6371;
@@ -211,6 +205,49 @@ const calculateDistance = (lat1, lon1, lat2, lon2) => {
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   const distance = R * c;
   return distance;
+};
+
+exports.getNearByChargingPoints = async (req, res) => {
+  let { latitude, longitude, radius } = req.query;
+
+  // If radius is not provided, set a default value of 10
+  if (!radius) {
+    radius = 10;
+  }
+
+  try {
+    const allChargingPoints = await ChargingPoint.find().populate("amenities"); // Populate the amenities field
+
+    let nearChargingPoints;
+    if (latitude && longitude) {
+      nearChargingPoints = allChargingPoints.filter((chargingPoint) => {
+        const distance = calculateDistance(
+          latitude,
+          longitude,
+          chargingPoint.latitude,
+          chargingPoint.longitude
+        );
+        return distance <= radius;
+      });
+    } else {
+      return res.status(400).json({
+        success: false,
+        message: "Latitude and longitude are required parameters.",
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "List of charging points",
+      data: nearChargingPoints,
+    });
+  } catch (error) {
+    console.error("Error fetching or filtering charging points:", error);
+    res.status(500).json({
+      success: false,
+      message: "An error occurred while fetching or filtering charging points",
+    });
+  }
 };
 
 exports.approveChargingPoint = async (req, res) => {

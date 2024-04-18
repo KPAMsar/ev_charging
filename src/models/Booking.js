@@ -2,21 +2,17 @@ const mongoose = require("mongoose");
 
 const BookingSlotSchema = new mongoose.Schema(
   {
-    vehicleType: {
+    bookingSlot: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "VehicleType",
       required: true,
     },
-    vehicleModel: {
+    user: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "VehicleModel",
+      ref: "User",
       required: true,
     },
-    connectionType: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "ConnectionType",
-      required: true,
-    },
+
     schedule: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Schedule",
@@ -35,11 +31,6 @@ const BookingSlotSchema = new mongoose.Schema(
         },
         message: (props) => `${props.value} is not a valid time format!`,
       },
-    },
-    price: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Price",
-      required: true,
     },
   },
   { timestamps: true }

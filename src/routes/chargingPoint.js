@@ -15,6 +15,12 @@ router.post(
 // Get all charging points
 router.get("/", ChargingPointController.getAllChargingPoints);
 
+router.get(
+  "/near-by",
+  Authenticated,
+  ChargingPointController.getNearByChargingPoints
+);
+
 // Get a charging point by ID
 router.get("/:id", Authenticated, ChargingPointController.getChargingPointById);
 
@@ -33,15 +39,12 @@ router.delete(
   ChargingPointController.deleteChargingPointById
 );
 
-router.post(
-  "/near-by",
-  Authenticated,
-  ChargingPointController.getNearByChargingPoints
-);
 router.patch(
   "/approve/:id",
   Authenticated,
   ChargingPointController.approveChargingPoint
 );
+
+// router.get('/search-stations', ChargingPointController.getNearByChargingPoints);
 
 module.exports = router;

@@ -22,20 +22,7 @@ const BookingSlotSchema = new mongoose.Schema(
       ref: "Schedule",
       required: true,
     },
-    date: {
-      type: Date,
-      required: true,
-    },
-    time: {
-      type: String,
-      required: true,
-      validate: {
-        validator: function (v) {
-          return /^([01]\d|2[0-3]):([0-5]\d)$/.test(v);
-        },
-        message: (props) => `${props.value} is not a valid time format!`,
-      },
-    },
+
     price: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Price",

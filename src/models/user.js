@@ -4,7 +4,7 @@ const bcrypt = require("bcrypt");
 const userSchema = new mongoose.Schema(
   {
     userId: String,
-    name: String,
+    // name: String,
     firstname: String,
     lastname: String,
     middlename: String,
@@ -25,7 +25,7 @@ const userSchema = new mongoose.Schema(
 
     role: {
       type: String,
-      enum: ["admin", "user", "super-admin"],
+      enum: ["admin", "attendant", "user", "super-admin"],
       default: "user",
     },
     isDisabled: {
