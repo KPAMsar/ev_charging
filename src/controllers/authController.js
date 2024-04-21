@@ -92,7 +92,7 @@ const Login = async (req, res) => {
     // });
 
     // Send refresh token in response body (not recommended in production, just for demonstration)
-    console.log("tonen", acessToken);
+    // console.log("tonen", acessToken);
     res.json({ role, acessToken, isAdmin: match.isAdmin });
   } else {
     res.sendStatus(401);
@@ -103,6 +103,7 @@ const SignUp = async (req, res) => {
   try {
     const { first_name, last_name, email, phone_number, password } = req.body;
 
+    console.log("req.ndaf", req.body);
     if (!first_name || !last_name || !email || !phone_number || !password) {
       return res
         .status(400)
@@ -597,14 +598,35 @@ const sendVerificationEmail = async (req, res) => {
 
 const getLoggedInUser = async (req, res) => {
   try {
-    // const loggedInUser = req.user;
-    // if (!loggedInUser) {
-    //   return res.send("User not logged in");
-    // }
-    console.log("logged in user");
-    return res.json({ success: true, user: loggedInUser });
+    // Extract token from the request headers
+    let token = req.headers.authorization;
+
+    // Check if token exists
+    if (!token) {
+      return res
+        .status(401)
+        .json({ success: false, message: "Unauthorized: No token provided" });
+    }
+
+    // Remove 'Bearer ' prefix from the token
+    token = token.split(" ")[1];
+
+    // Decode the token to get user data
+    const decoded = jwt.verify(token, process.env.REFRESH_TOKEN_SECRET);
+
+    const loggedInUser = decoded.foundUserId;
+
+    const userFromDB = await User.findById(loggedInUser).select("-password");
+    // Return the user data
+    return res.json({ success: true, user: userFromDB });
   } catch (error) {
     console.error("Error retrieving logged-in user:", error);
+    // Handle token verification errors
+    if (error.name === "JsonWebTokenError") {
+      return res
+        .status(401)
+        .json({ success: false, message: "Unauthorized: Invalid token" });
+    }
     return res
       .status(500)
       .json({ success: false, message: "Internal Server Error" });

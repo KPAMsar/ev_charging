@@ -43,6 +43,7 @@ const authenticate = async (req, res, next) => {
 
     const token = authHeader.split(" ")[1];
 
+    console.log("asdfafasdfasd", token);
     if (!token) {
       logger.error("Invalid Token: Malformed token");
       return res.status(401).json({
