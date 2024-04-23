@@ -35,7 +35,9 @@ const Login = async (req, res) => {
       .status(400)
       .json({ message: "Username and password are required." });
 
-  const foundUser = await User.findOne({ email }).exec();
+  const foundUser = await User.findOne({
+    email: email.toLowerCase().trim(),
+  }).exec();
 
   if (!foundUser)
     return res
@@ -103,7 +105,7 @@ const SignUp = async (req, res) => {
   try {
     const { first_name, last_name, email, phone_number, password } = req.body;
 
-    console.log("req.ndaf", req.body);
+    // console.log("req.ndafmmmmmmmm", req.body);
     if (!first_name || !last_name || !email || !phone_number || !password) {
       return res
         .status(400)
@@ -113,11 +115,10 @@ const SignUp = async (req, res) => {
     // Check if email is already registered
     const existingEmail = await User.findOne({ email }).exec();
     if (existingEmail) {
-      res.status(409).json({
+      return res.status(409).json({
         success: false,
         message: "Email is already taken by another user.",
       });
-      return;
     }
 
     // Check if phone number is already registered
@@ -138,6 +139,7 @@ const SignUp = async (req, res) => {
       email: email.toLowerCase().trim(),
       phone_number,
       password: hashedPassword,
+      role: req.body.role || "user",
     });
 
     const savedUser = await newUser.save();

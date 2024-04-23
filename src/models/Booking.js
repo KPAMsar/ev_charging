@@ -1,39 +1,48 @@
 const mongoose = require("mongoose");
 
-const BookingSlotSchema = new mongoose.Schema(
-  {
-    bookingSlot: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "VehicleType",
-      required: true,
-    },
-    user: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
-    },
-
-    schedule: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Schedule",
-      required: true,
-    },
-    date: {
-      type: Date,
-      required: true,
-    },
-    time: {
-      type: String,
-      required: true,
-      validate: {
-        validator: function (v) {
-          return /^([01]\d|2[0-3]):([0-5]\d)$/.test(v);
-        },
-        message: (props) => `${props.value} is not a valid time format!`,
-      },
-    },
+const bookingSchema = new mongoose.Schema({
+  charging_point: {
+    type: String,
+    required: true,
   },
-  { timestamps: true }
-);
+  vehicle_model: {
+    type: String,
+    required: true,
+  },
+  connection_type: {
+    type: String,
+    required: true,
+  },
+  date: {
+    type: String,
+    required: true,
+  },
+  time: {
+    type: String,
+    required: true,
+  },
+  price: {
+    type: Number,
+    required: true,
+  },
+  payment_status: {
+    type: String,
+    required: true,
+  },
+  charge_status: {
+    type: String,
+    required: true,
+  },
+  user: {
+    type: String,
+    required: true,
+  },
+  user_rating: {
+    type: Number,
+    required: true,
+  },
+});
 
-module.exports = mongoose.model("BookingSlot", BookingSlotSchema);
+const Bookings = mongoose.model("Booking", bookingSchema);
+
+module.exports = Bookings;

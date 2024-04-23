@@ -64,3 +64,5 @@
 {"level":"error","message":"Invalid Token: Token not provided"}
 {"level":"error","message":"Invalid Token: Token not provided"}
 {"level":"error","message":"Invalid Token: Token not provided"}
+{"level":"error","message":"Authorization Error:"}
+{"level":"error","message":"Authorization Error:"}

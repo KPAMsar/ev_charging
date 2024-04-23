@@ -2,16 +2,32 @@ const BookingSlot = require("../models/BookingSlot");
 
 exports.createBooking = async (req, res) => {
   try {
+    const {
+      charging_point,
+      vehicle_model,
+      connection_type,
+      date,
+      time,
+      price,
+      payment_status,
+      charge_status,
+      user_rating,
+    } = req.body;
+
+    const user = req.user.foundUserId;
+    // Check if all required fields are provided
     const requiredFields = [
-      "vehicleType",
-      "vehicleModel",
-      "connectionType",
-      "schedule",
+      "charging_point",
+      "vehicle_model",
+      "connection_type",
       "date",
       "time",
       "price",
+      "payment_status",
+      "charge_status",
+      "user",
+      "user_rating",
     ];
-
     for (let field of requiredFields) {
       if (!req.body[field]) {
         return res.status(400).json({
@@ -21,19 +37,27 @@ exports.createBooking = async (req, res) => {
       }
     }
 
+    // Create a new booking slot
     const newBooking = new BookingSlot({
-      vehicleType,
-      vehicleModel,
-      connectionType,
-      schedule,
+      charging_point,
+      vehicle_model,
+      connection_type,
       date,
       time,
       price,
+      payment_status,
+      charge_status,
+      user,
+      user_rating,
     });
+
+    // Save the new booking slot to the database
     await newBooking.save();
 
+    // Send a successful response with the created booking slot
     return res.status(201).json({ success: true, booking: newBooking });
   } catch (error) {
+    // Handle errors
     console.error(error);
     return res
       .status(500)
