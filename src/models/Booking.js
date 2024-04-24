@@ -2,15 +2,23 @@ const mongoose = require("mongoose");
 
 const bookingSchema = new mongoose.Schema({
   charging_point: {
-    type: String,
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "ChargingPoint",
     required: true,
   },
   vehicle_model: {
-    type: String,
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "VehicleModel",
+    required: true,
+  },
+  vehicle_type: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "VehicleType",
     required: true,
   },
   connection_type: {
-    type: String,
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "ConnectionType",
     required: true,
   },
   date: {
@@ -22,7 +30,8 @@ const bookingSchema = new mongoose.Schema({
     required: true,
   },
   price: {
-    type: Number,
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Price",
     required: true,
   },
   payment_status: {
@@ -34,7 +43,8 @@ const bookingSchema = new mongoose.Schema({
     required: true,
   },
   user: {
-    type: String,
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
     required: true,
   },
   user_rating: {

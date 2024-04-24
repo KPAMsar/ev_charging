@@ -13,15 +13,15 @@ const Authenticated = require("../middleware/authenticate");
 router.post("/", Authenticated, createPrice);
 
 // Route to update an existing price by ID
-router.put("/:id", updatePrice);
+router.put("/:id", Authenticated, updatePrice);
 
 // Route to delete an existing price by ID
-router.delete("/:id", deletePrice);
+router.delete("/:id", Authenticated, deletePrice);
 
 // Route to get all
-router.get("/", getPrices);
+router.get("/", Authenticated, getPrices);
 
 // Route to get a single price by ID
-router.get("/:id", getPriceById);
+router.get("/:id", Authenticated, getPriceById);
 
 module.exports = router;

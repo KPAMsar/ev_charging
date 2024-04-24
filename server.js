@@ -28,6 +28,14 @@ const UserRoutes = require("./src/routes/user");
 const AttendantRoutes = require("./src/routes/attendant");
 
 const app = express();
+
+const http = require("http").createServer(app);
+const io = require("socket.io")(http, {
+  cors: {
+    origin: "http://localhost:3000", // Replace with your React app's origin
+  },
+});
+
 app.use(express.json());
 app.use(cors());
 
@@ -66,7 +74,19 @@ app.use("/api/admin-user", AdminRoutes);
 app.use("/api/user", UserRoutes);
 app.use("/api/attendants", AttendantRoutes);
 
-const port = process.env.PORT;
+const port = process.env.PORT || 5001;
+
+io.on("connection", (socket) => {
+  console.log("A user connected");
+
+  // Handle successful POST operation notification event
+  socket.on("postSuccess", (data) => {
+    console.log("POST operation successful:", data);
+    // Broadcast notification to all connected clients
+    io.emit("notification", data);
+  });
+});
+
 app.listen(port, () => {
   console.log(`App is running on port ${port}`);
 });

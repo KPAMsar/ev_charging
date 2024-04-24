@@ -123,3 +123,4 @@
 {"level":"error","message":"Authorization Error:"}
 {"exp":1713908661,"foundUserId":"661f02ccd68ef60a4d621137","iat":1713822261,"level":"info","message":"Authorization==>","name":"kpamsarshija@gmail.com","role":"admin"}
 {"level":"info","message":"Authorization==> User Role:"}
+{"level":"error","message":"Invalid Token: Token not provided"}

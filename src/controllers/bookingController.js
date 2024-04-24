@@ -1,6 +1,7 @@
-const BookingSlot = require("../models/BookingSlot");
+const BookingSlot = require("../models/Booking");
+const socketIo = require("socket.io");
 
-exports.createBooking = async (req, res) => {
+exports.createBooking = async (req, res, io) => {
   try {
     const {
       charging_point,
@@ -11,10 +12,12 @@ exports.createBooking = async (req, res) => {
       price,
       payment_status,
       charge_status,
+      vehicle_type,
       user_rating,
     } = req.body;
 
     const user = req.user.foundUserId;
+
     // Check if all required fields are provided
     const requiredFields = [
       "charging_point",
@@ -26,6 +29,7 @@ exports.createBooking = async (req, res) => {
       "payment_status",
       "charge_status",
       "user",
+      "vehicle_type",
       "user_rating",
     ];
     for (let field of requiredFields) {
@@ -42,6 +46,7 @@ exports.createBooking = async (req, res) => {
       charging_point,
       vehicle_model,
       connection_type,
+      vehicle_type,
       date,
       time,
       price,
@@ -54,8 +59,16 @@ exports.createBooking = async (req, res) => {
     // Save the new booking slot to the database
     await newBooking.save();
 
+    // Emit the new booking event using the io object
+    if (io) {
+      io.emit("newBooking", newBooking);
+    }
     // Send a successful response with the created booking slot
-    return res.status(201).json({ success: true, booking: newBooking });
+    return res.status(201).json({
+      success: true,
+      message: "Booking created successfully",
+      data: newBooking,
+    });
   } catch (error) {
     // Handle errors
     console.error(error);

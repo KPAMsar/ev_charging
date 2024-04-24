@@ -50,6 +50,7 @@ const authenticate = async (req, res, next) => {
         message: "Malformed token",
       });
     }
+    console.log("jjjjjjjjjjjjjj", token);
 
     const decoded = jwt.verify(token, process.env.REFRESH_TOKEN_SECRET);
     req.user = decoded;
