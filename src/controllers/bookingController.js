@@ -1,5 +1,5 @@
 const BookingSlot = require("../models/Booking");
-const socketIo = require("socket.io");
+const Notification = require("../models/Notification");
 
 exports.createBooking = async (req, res, io) => {
   try {
@@ -26,9 +26,6 @@ exports.createBooking = async (req, res, io) => {
       "date",
       "time",
       "price",
-      "payment_status",
-      "charge_status",
-      "user",
       "vehicle_type",
       "user_rating",
     ];
@@ -50,8 +47,6 @@ exports.createBooking = async (req, res, io) => {
       date,
       time,
       price,
-      payment_status,
-      charge_status,
       user,
       user_rating,
     });
@@ -60,9 +55,13 @@ exports.createBooking = async (req, res, io) => {
     await newBooking.save();
 
     // Emit the new booking event using the io object
-    if (io) {
-      io.emit("newBooking", newBooking);
-    }
+    const saveNotification = new Notification({
+      message: "New Booking ",
+      user: req.user.foundUserId,
+      booking: newBooking._id,
+    });
+
+    await saveNotification.save();
     // Send a successful response with the created booking slot
     return res.status(201).json({
       success: true,

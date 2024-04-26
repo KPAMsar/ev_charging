@@ -36,11 +36,15 @@ const bookingSchema = new mongoose.Schema({
   },
   payment_status: {
     type: String,
-    required: true,
+
+    enum: ["pending", "declined", "successful"],
+    default: "pending",
   },
   charge_status: {
     type: String,
-    required: true,
+
+    enum: ["pending", "charging", "charged"],
+    default: "pending",
   },
   user: {
     type: mongoose.Schema.Types.ObjectId,

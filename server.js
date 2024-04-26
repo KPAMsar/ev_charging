@@ -26,6 +26,7 @@ const ReviewRoutes = require("./src/routes/review");
 const AdminRoutes = require("./src/routes/adminUser");
 const UserRoutes = require("./src/routes/user");
 const AttendantRoutes = require("./src/routes/attendant");
+const NotificationRoutes = require("./src/routes/notification");
 
 const app = express();
 
@@ -73,6 +74,7 @@ app.use("/api/review", ReviewRoutes);
 app.use("/api/admin-user", AdminRoutes);
 app.use("/api/user", UserRoutes);
 app.use("/api/attendants", AttendantRoutes);
+app.use("/api/notification", NotificationRoutes);
 
 const port = process.env.PORT || 5001;
 
