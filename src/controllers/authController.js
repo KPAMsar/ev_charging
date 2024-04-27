@@ -35,7 +35,9 @@ const Login = async (req, res) => {
       .status(400)
       .json({ message: "Username and password are required." });
 
-  const foundUser = await User.findOne({ email }).exec();
+  const foundUser = await User.findOne({
+    email: email.toLowerCase().trim(),
+  }).exec();
 
   if (!foundUser)
     return res
@@ -103,7 +105,7 @@ const SignUp = async (req, res) => {
   try {
     const { first_name, last_name, email, phone_number, password } = req.body;
 
-    console.log("req.ndaf", req.body);
+    // console.log("req.ndafmmmmmmmm", req.body);
     if (!first_name || !last_name || !email || !phone_number || !password) {
       return res
         .status(400)
@@ -113,11 +115,10 @@ const SignUp = async (req, res) => {
     // Check if email is already registered
     const existingEmail = await User.findOne({ email }).exec();
     if (existingEmail) {
-      res.status(409).json({
+      return res.status(409).json({
         success: false,
         message: "Email is already taken by another user.",
       });
-      return;
     }
 
     // Check if phone number is already registered
@@ -133,11 +134,12 @@ const SignUp = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const newUser = new User({
-      first_name,
-      last_name,
+      firstname: first_name,
+      lastname: last_name,
       email: email.toLowerCase().trim(),
       phone_number,
       password: hashedPassword,
+      role: req.body.role || "user",
     });
 
     const savedUser = await newUser.save();
@@ -632,6 +634,46 @@ const getLoggedInUser = async (req, res) => {
       .json({ success: false, message: "Internal Server Error" });
   }
 };
+const getLoggedInUserByPosting = async (req, res) => {
+  try {
+    // Extract token from the request headers
+    const tk = req.body.token;
+    let token = req.headers.authorization;
+
+    // Check if token exists
+    if (!token) {
+      return res
+        .status(401)
+        .json({ success: false, message: "Unauthorized: No token provided" });
+    }
+
+    // Remove 'Bearer ' prefix from the token
+    token = token.split(" ")[1];
+
+    // Decode the token to get user data
+    if (tk) {
+      const decoded = jwt.verify(tk, process.env.REFRESH_TOKEN_SECRET);
+    }
+    const decoded = jwt.verify(token, process.env.REFRESH_TOKEN_SECRET);
+
+    const loggedInUser = decoded.foundUserId;
+
+    const userFromDB = await User.findById(loggedInUser).select("-password");
+    // Return the user data
+    return res.json({ success: true, user: userFromDB });
+  } catch (error) {
+    console.error("Error retrieving logged-in user:", error);
+    // Handle token verification errors
+    if (error.name === "JsonWebTokenError") {
+      return res
+        .status(401)
+        .json({ success: false, message: "Unauthorized: Invalid token" });
+    }
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal Server Error" });
+  }
+};
 
 module.exports = {
   SignUp,
@@ -644,4 +686,5 @@ module.exports = {
   ResetMyPassword,
   getLoggedInUser,
   adminVerifyEmail,
+  getLoggedInUserByPosting,
 };

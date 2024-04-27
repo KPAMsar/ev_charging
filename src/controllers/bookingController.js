@@ -1,17 +1,34 @@
-const BookingSlot = require("../models/BookingSlot");
+const BookingSlot = require("../models/Booking");
+const Notification = require("../models/Notification");
 
-exports.createBooking = async (req, res) => {
+exports.createBooking = async (req, res, io) => {
   try {
+    const {
+      charging_point,
+      vehicle_model,
+      connection_type,
+      date,
+      time,
+      price,
+      payment_status,
+      charge_status,
+      vehicle_type,
+      user_rating,
+    } = req.body;
+
+    const user = req.user.foundUserId;
+
+    // Check if all required fields are provided
     const requiredFields = [
-      "vehicleType",
-      "vehicleModel",
-      "connectionType",
-      "schedule",
+      "charging_point",
+      "vehicle_model",
+      "connection_type",
       "date",
       "time",
       "price",
+      "vehicle_type",
+      "user_rating",
     ];
-
     for (let field of requiredFields) {
       if (!req.body[field]) {
         return res.status(400).json({
@@ -21,19 +38,38 @@ exports.createBooking = async (req, res) => {
       }
     }
 
+    // Create a new booking slot
     const newBooking = new BookingSlot({
-      vehicleType,
-      vehicleModel,
-      connectionType,
-      schedule,
+      charging_point,
+      vehicle_model,
+      connection_type,
+      vehicle_type,
       date,
       time,
       price,
+      user,
+      user_rating,
     });
+
+    // Save the new booking slot to the database
     await newBooking.save();
 
-    return res.status(201).json({ success: true, booking: newBooking });
+    // Emit the new booking event using the io object
+    const saveNotification = new Notification({
+      message: "New Booking ",
+      user: req.user.foundUserId,
+      booking: newBooking._id,
+    });
+
+    await saveNotification.save();
+    // Send a successful response with the created booking slot
+    return res.status(201).json({
+      success: true,
+      message: "Booking created successfully",
+      data: newBooking,
+    });
   } catch (error) {
+    // Handle errors
     console.error(error);
     return res
       .status(500)

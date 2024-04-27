@@ -1,9 +1,10 @@
 const express = require("express");
 const router = express.Router();
 const AmenityController = require("../controllers/amenityController");
+const Authenticated = require("../middleware/authenticate");
 
 // Create a new amenity
-router.post("/", AmenityController.createAmenity);
+router.post("/", Authenticated, AmenityController.createAmenity);
 
 // Get all amenities
 router.get("/", AmenityController.getAllAmenities);

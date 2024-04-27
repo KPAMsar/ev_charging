@@ -19,5 +19,10 @@ router.post(
   AuthController.ChangePassword
 );
 router.get("/get-logged-user", Authenticate, AuthController.getLoggedInUser);
+router.post(
+  "/post-get-logged-user",
+  Authenticate,
+  AuthController.getLoggedInUserByPosting
+);
 
 module.exports = router;
