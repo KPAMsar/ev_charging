@@ -134,8 +134,8 @@ const SignUp = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const newUser = new User({
-      first_name,
-      last_name,
+      firstname: first_name,
+      lastname: last_name,
       email: email.toLowerCase().trim(),
       phone_number,
       password: hashedPassword,
@@ -634,6 +634,46 @@ const getLoggedInUser = async (req, res) => {
       .json({ success: false, message: "Internal Server Error" });
   }
 };
+const getLoggedInUserByPosting = async (req, res) => {
+  try {
+    // Extract token from the request headers
+    const tk = req.body.token;
+    let token = req.headers.authorization;
+
+    // Check if token exists
+    if (!token) {
+      return res
+        .status(401)
+        .json({ success: false, message: "Unauthorized: No token provided" });
+    }
+
+    // Remove 'Bearer ' prefix from the token
+    token = token.split(" ")[1];
+
+    // Decode the token to get user data
+    if (tk) {
+      const decoded = jwt.verify(tk, process.env.REFRESH_TOKEN_SECRET);
+    }
+    const decoded = jwt.verify(token, process.env.REFRESH_TOKEN_SECRET);
+
+    const loggedInUser = decoded.foundUserId;
+
+    const userFromDB = await User.findById(loggedInUser).select("-password");
+    // Return the user data
+    return res.json({ success: true, user: userFromDB });
+  } catch (error) {
+    console.error("Error retrieving logged-in user:", error);
+    // Handle token verification errors
+    if (error.name === "JsonWebTokenError") {
+      return res
+        .status(401)
+        .json({ success: false, message: "Unauthorized: Invalid token" });
+    }
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal Server Error" });
+  }
+};
 
 module.exports = {
   SignUp,
@@ -646,4 +686,5 @@ module.exports = {
   ResetMyPassword,
   getLoggedInUser,
   adminVerifyEmail,
+  getLoggedInUserByPosting,
 };
