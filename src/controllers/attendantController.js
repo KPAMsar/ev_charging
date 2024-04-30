@@ -1,3 +1,6 @@
+const User = require("../models/user");
+const bcrypt = require("bcrypt");
+
 const fetchAttendantUsers = async (req, res) => {
   try {
     const attendantUsers = await User.find({ role: "attendant" });
