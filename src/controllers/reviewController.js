@@ -6,7 +6,7 @@ exports.createReview = async (req, res) => {
   try {
     const userId = req.user.foundUserId;
     const { chargingPointId, rating, comment } = req.body;
-    if (!chargingPointId || !userId || !rating || !comment) {
+    if (!chargingPointId || !userId) {
       return res.status(400).json({
         success: false,
         message: "Charging point ID, user ID, rating, and comment are required",
@@ -33,6 +33,7 @@ exports.createReview = async (req, res) => {
     });
     await newReview.save();
 
+    console.log("reveiw", chargingPointMatch);
     chargingPointMatch.reviews = [
       ...(chargingPointMatch.reviews || []),
       newReview._id,
@@ -42,7 +43,7 @@ exports.createReview = async (req, res) => {
 
     res.status(201).json({ success: true, review: newReview });
   } catch (error) {
-    console.error(error);
+    console.error(error.message);
     res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 };

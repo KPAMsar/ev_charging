@@ -40,6 +40,58 @@ const disableUser = async (req, res) => {
   }
 };
 
+const checkPhoneNumberStatus = async (req, res) => {
+  try {
+    const phoneNumber = req.params.phoneNumber;
+    const existingUser = await User.findOne({
+      phone_number: phoneNumber,
+    });
+
+    if (existingUser) {
+      res.json({
+        message: "Phone number is not available for use",
+        exists: true,
+      });
+    } else {
+      res.json({ message: "Phone number available for use", exists: false });
+    }
+  } catch (error) {
+    console.error("Error checking phone number:", error);
+    res.status(500).json({
+      success: false,
+      message: "An error occured",
+      error: error.message,
+    });
+  }
+};
+
+const checkEmailStatus = async (req, res) => {
+  try {
+    const email = req.params.email;
+    const existingUser = await User.findOne({
+      email: email,
+    });
+
+    if (existingUser) {
+      res.json({
+        message: "Email is not available for use",
+        exists: true,
+      });
+    } else {
+      res.json({ message: "Email available for use", exists: false });
+    }
+  } catch (error) {
+    console.error("Error checking Email:", error);
+    res.status(500).json({
+      success: false,
+      message: "An error occured",
+      error: error.message,
+    });
+  }
+};
+
 module.exports = {
   disableUser,
+  checkPhoneNumberStatus,
+  checkEmailStatus,
 };

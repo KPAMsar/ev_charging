@@ -4,6 +4,6 @@ const AttendantController = require("../controllers/attendantController");
 
 router.get("/get-attendants", AttendantController.fetchAttendantUsers);
 router.get("/disable-attendant", AttendantController.disableAttendant);
-router.post("/add-attendant", AttendantController.fetchAttendantUsers);
+router.post("/add-attendant", AttendantController.addAttendant);
 
 module.exports = router;

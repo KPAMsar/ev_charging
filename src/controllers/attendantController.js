@@ -1,3 +1,8 @@
+const User = require("../models/user");
+const bcrypt = require("bcrypt");
+const { sendEmail } = require("../utils/sendEmail");
+const { generateOTP } = require("../utils/otpGenerator");
+
 const fetchAttendantUsers = async (req, res) => {
   try {
     const attendantUsers = await User.find({ role: "attendant" });
@@ -114,7 +119,9 @@ const addAttendant = async (req, res) => {
     });
 
     const savedUser = await newUser.save();
+    const otp = await generateOTP(email.toLowerCase().trim());
 
+    sendEmail(email.toLowerCase().trim(), otp);
     return res.status(200).json({
       success: true,
       message: "Attendant added successfully.",
