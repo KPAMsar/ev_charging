@@ -68,7 +68,9 @@ exports.getReviewsForChargingPoint = async (req, res) => {
         .status(400)
         .json({ success: false, message: "Charging point ID is required" });
     }
-    const reviews = await Review.find({ chargingPoint: chargingPointId });
+    const reviews = await Review.find({
+      chargingPoint: chargingPointId,
+    }).populate("user");
     res.status(200).json({ success: true, reviews });
   } catch (error) {
     console.error(error);

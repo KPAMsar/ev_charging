@@ -1,6 +1,7 @@
 const ChargingPoint = require("../models/ChargingPoint");
 const Cloudinary = require("../utils/cloudinary");
 const User = require("../models/user");
+const bcrypt = require("bcrypt");
 
 // Create a new charging point
 exports.createChargingPoint = async (req, res) => {
@@ -100,6 +101,7 @@ exports.findChargingPointByAttendant = async (req, res) => {
 
 exports.addAttendantToChargingPoint = async (req, res) => {
   try {
+    return console.log("reeeee", req.body);
     // Validate user data
     const userData = req.body;
     await validateUserData(userData);
@@ -171,9 +173,7 @@ const createUser = async (userData) => {
   return newUser.save();
 };
 
-// Add user as attendant to charging point
 const addAttendantToChargingPoint = async (chargingPointId, attendantId) => {
-  // Find the charging point by ID
   const chargingPoint = await ChargingPoint.findById(chargingPointId);
   if (!chargingPoint) {
     throw { status: 404, message: "Charging point not found" };
@@ -187,7 +187,6 @@ const addAttendantToChargingPoint = async (chargingPointId, attendantId) => {
     };
   }
 
-  // Add the attendant to the charging point's attendants array
   chargingPoint.attendants.push(attendantId);
   await chargingPoint.save();
 };

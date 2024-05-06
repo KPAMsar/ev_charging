@@ -80,24 +80,24 @@ const Login = async (req, res) => {
     let chargeToken = null;
 
     // Check if user role is "attendant" or "attendant-admin"
-    console.log("foundUser[[[[[[[[[[[", foundUser);
+    console.log("foundUser[[[[[[[[[[[", foundUser._id);
     if (
       foundUser.role === "attendant" ||
       foundUser.role === "attendant-admin"
     ) {
       const chargingPoint = await ChargingPoint.find({
         attendants: {
-          $elemMatch: { $eq: new ObjectId("66319cf89e73606e70c93910") },
+          $elemMatch: { $eq: new ObjectId(foundUser._id) },
         },
       }).lean();
 
-      return console.log(
-        "//////////////////////////////////////",
-        chargingPoint
-      );
-      if (chargingPoint) {
-        chargeToken = chargingPoint.toObject();
-      }
+      // return console.log(
+      //   "//////////////////////////////////////",
+      //   chargingPoint
+      // // );
+      // if (chargingPoint) {
+      //   chargeToken = chargingPoint.toObject();
+      // }
     }
 
     // console.log("tonen", acessToken);
