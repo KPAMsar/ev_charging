@@ -27,7 +27,7 @@ const AdminRoutes = require("./src/routes/adminUser");
 const UserRoutes = require("./src/routes/user");
 const AttendantRoutes = require("./src/routes/attendant");
 const NotificationRoutes = require("./src/routes/notification");
-
+const ChargingPointAdminUserRoutes = require("./src/routes/chargingPointAdmin");
 const app = express();
 
 const http = require("http").createServer(app);
@@ -75,6 +75,7 @@ app.use("/api/admin-user", AdminRoutes);
 app.use("/api/user", UserRoutes);
 app.use("/api/attendants", AttendantRoutes);
 app.use("/api/notification", NotificationRoutes);
+app.use("/api/charging-point-admin", ChargingPointAdminUserRoutes);
 
 const port = process.env.PORT || 5001;
 

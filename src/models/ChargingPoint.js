@@ -21,11 +21,13 @@ const chargingPointSchema = new mongoose.Schema({
       ref: "Amenity",
     },
   ],
-  connectionType: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "ConnectionType",
-    required: true,
-  },
+  connectionType: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "ConnectionType",
+      required: true,
+    },
+  ],
   status: {
     type: String,
     enum: ["Charging", "Available", "Out of service"],
@@ -48,6 +50,19 @@ const chargingPointSchema = new mongoose.Schema({
       type: String,
     },
   },
+  adminUser: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+  ],
+  attendants: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Attendant",
+    },
+  ],
 });
 
 const ChargingPoint = mongoose.model("ChargingPoint", chargingPointSchema);

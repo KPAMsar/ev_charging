@@ -1,8 +1,12 @@
 const User = require("../models/user");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
+const ChargingPoint = require("../models/ChargingPoint");
 const VerifyEmail = require("../utils/sendEmail");
 const OTP = require("../../src/models/OTP");
+const mongoose = require("mongoose");
+const { ObjectId } = require("mongoose").Types;
+
 const otpGenerator = require("otp-generator");
 const {
   sendEmail,
@@ -38,7 +42,7 @@ const Login = async (req, res) => {
   const foundUser = await User.findOne({
     email: email.toLowerCase().trim(),
   }).exec();
-
+  console.log(".......................", foundUser);
   if (!foundUser)
     return res
       .status(401)
@@ -58,18 +62,6 @@ const Login = async (req, res) => {
 
     const role = foundUser.role;
 
-    // Generate access token
-    // const accessToken = jwt.sign(
-    //   {
-    //     name: foundUser.email,
-    //     role: foundUser.role,
-    //     foundUserId: foundUser._id,
-    //   },
-
-    //   process.env.ACCESS_TOKEN_SECRET,
-    //   { expiresIn: "1d" }
-    // );
-
     // Generate token
     const acessToken = jwt.sign(
       {
@@ -85,17 +77,31 @@ const Login = async (req, res) => {
     // foundUser.refreshToken.push(refreshToken);
     await foundUser.save();
 
-    // Set access token as a cookie
-    // res.cookie("accessToken", accessToken, {
-    //   httpOnly: true,
-    //   secure: true,
-    //   sameSite: "None",
-    //   maxAge: 10 * 1000, // 10 seconds for demonstration purposes, change as needed
-    // });
+    let chargeToken = null;
 
-    // Send refresh token in response body (not recommended in production, just for demonstration)
+    // Check if user role is "attendant" or "attendant-admin"
+    console.log("foundUser[[[[[[[[[[[", foundUser._id);
+    if (
+      foundUser.role === "attendant" ||
+      foundUser.role === "attendant-admin"
+    ) {
+      const chargingPoint = await ChargingPoint.find({
+        attendants: {
+          $elemMatch: { $eq: new ObjectId(foundUser._id) },
+        },
+      }).lean();
+
+      // return console.log(
+      //   "//////////////////////////////////////",
+      //   chargingPoint
+      // // );
+      // if (chargingPoint) {
+      //   chargeToken = chargingPoint.toObject();
+      // }
+    }
+
     // console.log("tonen", acessToken);
-    res.json({ role, acessToken, isAdmin: match.isAdmin });
+    res.json({ role, acessToken, isAdmin: match.isAdmin, chargeToken });
   } else {
     res.sendStatus(401);
   }

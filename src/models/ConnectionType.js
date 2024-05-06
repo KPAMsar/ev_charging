@@ -8,6 +8,11 @@ const ConnectionTypeSchema = new mongoose.Schema(
       unique: true,
     },
     description: String,
+    status: {
+      type: String,
+      enum: ["inUse", "available", "outOfService"],
+      default: "outOfService",
+    },
   },
   { timestamps: true }
 );
