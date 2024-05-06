@@ -110,12 +110,12 @@ const addAttendant = async (req, res) => {
     const hashedPassword = await bcrypt.hash("4444", 10);
 
     const newUser = new User({
-      first_name,
-      last_name,
+      firstname: first_name,
+      lastname: last_name,
       email: email.toLowerCase().trim(),
       phone_number,
       password: hashedPassword,
-      role: "attendant",
+      role: req.body.role,
     });
 
     const savedUser = await newUser.save();

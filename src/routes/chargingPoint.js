@@ -12,6 +12,26 @@ router.post(
   ChargingPointController.createChargingPoint
 );
 
+router.post(
+  "/update-connection-type",
+  ChargingPointController.addConnectionTypesToChargingPoint
+);
+
+router.get(
+  "/chargingpoint/:id/connectiontypes",
+  ChargingPointController.getAllConnectionTypesFromChargingPoint
+);
+router.get(
+  "/charging-point-by-attendant",
+  Authenticated,
+  ChargingPointController.findChargingPointByAttendant
+);
+router.post(
+  "/add-attendants",
+  Authenticated,
+  ChargingPointController.addAttendantToChargingPoint
+);
+
 // Get all charging points
 router.get("/", ChargingPointController.getAllChargingPoints);
 

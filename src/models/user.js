@@ -25,7 +25,13 @@ const userSchema = new mongoose.Schema(
 
     role: {
       type: String,
-      enum: ["admin", "attendant", "user", "super-admin"],
+      enum: [
+        "admin",
+        "attendant",
+        "user",
+        "super-admin",
+        "charging-point-admin",
+      ],
       default: "user",
     },
     isDisabled: {
