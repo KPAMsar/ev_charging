@@ -13,7 +13,7 @@ exports.createBooking = async (req, res, io) => {
       payment_status,
       charge_status,
       vehicle_type,
-      user_rating,
+      // user_rating,
     } = req.body;
 
     const user = req.user.foundUserId;
@@ -27,7 +27,7 @@ exports.createBooking = async (req, res, io) => {
       "time",
       "price",
       "vehicle_type",
-      "user_rating",
+      // "user_rating",
     ];
     for (let field of requiredFields) {
       if (!req.body[field]) {
@@ -48,7 +48,7 @@ exports.createBooking = async (req, res, io) => {
       time,
       price,
       user,
-      user_rating,
+      // user_rating,
     });
 
     // Save the new booking slot to the database

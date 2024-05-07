@@ -2,6 +2,7 @@ const ChargingPoint = require("../models/ChargingPoint");
 const Cloudinary = require("../utils/cloudinary");
 const User = require("../models/user");
 const bcrypt = require("bcrypt");
+const { ObjectId } = require("mongoose").Types;
 
 // Create a new charging point
 exports.createChargingPoint = async (req, res) => {
@@ -101,17 +102,36 @@ exports.findChargingPointByAttendant = async (req, res) => {
 
 exports.addAttendantToChargingPoint = async (req, res) => {
   try {
-    return console.log("reeeee", req.body);
     // Validate user data
     const userData = req.body;
+    const loggedInAdminId = new ObjectId(req.user.foundUserId);
+
+    const chargingPoint = await ChargingPoint.findOne({
+      adminUser: loggedInAdminId,
+    });
+
+    console.log("ifoun", chargingPoint);
+    if (!chargingPoint) {
+      return res.json({
+        success: false,
+        message: "Unknown logged in Admin User",
+      });
+    }
+
     await validateUserData(userData);
 
     // Create new user
     const newUser = await createUser(userData);
+    if (!newUser) {
+      return res.json({
+        success: false,
+        message: "Something went wrong",
+      });
+    }
 
-    // Add user as attendant to charging point
-    const { chargingPointId, attendantId } = userData;
-    await addAttendantToChargingPoint(chargingPointId, attendantId);
+    const chargingPointId = chargingPoint._id;
+    console.log("beforerererer");
+    await addAttendantToChargingPoint(chargingPointId, userData._id);
 
     res.status(200).json({
       success: true,
@@ -178,7 +198,7 @@ const addAttendantToChargingPoint = async (chargingPointId, attendantId) => {
   if (!chargingPoint) {
     throw { status: 404, message: "Charging point not found" };
   }
-
+  console.log("1111111111111111111");
   // Check if the attendant is already assigned to the charging point
   if (chargingPoint.attendants.includes(attendantId)) {
     throw {
@@ -187,7 +207,10 @@ const addAttendantToChargingPoint = async (chargingPointId, attendantId) => {
     };
   }
 
-  chargingPoint.attendants.push(attendantId);
+  chargingPoint.attendants = [
+    ...(chargingPoint.attendants || []),
+    new ObjectId(attendantId),
+  ];
   await chargingPoint.save();
 };
 
@@ -392,26 +415,6 @@ exports.deleteChargingPointById = async (req, res) => {
       .json({ success: false, message: "Internal Server Error" });
   }
 };
-
-//     const nearChargingPoints = allChargingPoints.filter((chargingPoint) => {
-//       const distance = calculateDistance(
-//         latitude,
-//         longitude,
-//         chargingPoint.latitude,
-//         chargingPoint.longitude
-//       );
-//       return distance <= radius;
-//     });
-
-//     res.json({ success: true, data: nearChargingPoints });
-//   } catch (error) {
-//     console.error("Error fetching or filtering charging points:", error);
-//     res.status(500).json({
-//       success: false,
-//       message: "An error occurred while fetching or filtering charging points",
-//     });
-//   }
-// };
 
 const calculateDistance = (lat1, lon1, lat2, lon2) => {
   const R = 6371;
