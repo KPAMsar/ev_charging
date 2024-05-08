@@ -51,10 +51,10 @@ const bookingSchema = new mongoose.Schema({
     ref: "User",
     required: true,
   },
-  user_rating: {
-    type: Number,
-    required: true,
-  },
+  // user_rating: {
+  //   type: Number,
+  //   required: true,
+  // },
 });
 
 const Bookings = mongoose.model("Booking", bookingSchema);
