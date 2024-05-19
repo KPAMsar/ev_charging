@@ -4,16 +4,29 @@ const connectionTypeController = require("../controllers/connectionTypeControlle
 const Authenticated = require("../middleware/authenticate");
 
 // Create a new connection type
-router.post("/", connectionTypeController.createConnectionType);
+router.post("/", Authenticated, connectionTypeController.createConnectionType);
 
 // Get all connection types
-router.get("/", connectionTypeController.getAllConnectionTypes);
+router.get("/", Authenticated, connectionTypeController.getAllConnectionTypes);
 
 // Get a connection type by ID
-router.get("/:id", connectionTypeController.getConnectionTypeById);
+router.get(
+  "/:id",
+  Authenticated,
+  connectionTypeController.getConnectionTypeById
+);
 
+router.post(
+  "/update-status",
+  Authenticated,
+  connectionTypeController.updateConnectionTypeStatus
+);
 // Update a connection type by ID
-router.put("/:id", connectionTypeController.updateConnectionTypeById);
+router.put(
+  "/:id",
+  Authenticated,
+  connectionTypeController.updateConnectionTypeById
+);
 
 // Delete a connection type by ID
 router.delete("/:id", connectionTypeController.deleteConnectionTypeById);

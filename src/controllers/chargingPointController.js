@@ -175,7 +175,6 @@ const createUser = async (userData) => {
 };
 
 const addAttendantToChargingPoint = async (chargingPointId, attendantId) => {
-  console.log("herer", attendantId);
   const chargingPoint = await ChargingPoint.findById(chargingPointId);
   if (!chargingPoint) {
     throw { status: 404, message: "Charging point not found" };
@@ -228,7 +227,8 @@ exports.getAttendantsByChargingPoint = async (req, res) => {
 
 exports.addConnectionTypesToChargingPoint = async (req, res) => {
   try {
-    const chargingPointId = req.body.id;
+    const chargingPointId = req?.user?.chargingPoint;
+
     const connectionTypeData = req.body.connectionType;
 
     if (!chargingPointId) {
@@ -247,18 +247,24 @@ exports.addConnectionTypesToChargingPoint = async (req, res) => {
       });
     }
 
-    if (!connectionTypeData) {
-      return res.status(400).json({
-        success: false,
-        message: "Connection type data is required",
-      });
-    }
+    // if (!connectionTypeData || !Array.isArray(connectionTypeData)) {
+    //   return res.status(400).json({
+    //     success: false,
+    //     message: "Connection type data is required and should be an array",
+    //   });
+    // }
 
-    // Deduplicate connection types and add new ones
-    const uniqueConnectionTypes = [
-      ...new Set([...foundData.connectionType, ...connectionTypeData]),
-    ];
-    foundData.connectionType = uniqueConnectionTypes;
+    // Add only unique connection types to the array
+    const existingConnectionTypes = foundData.connectionType.map((type) =>
+      type.toString()
+    );
+
+    console.log("21");
+    connectionTypeData.forEach((type) => {
+      if (!existingConnectionTypes.includes(type.toString())) {
+        foundData.connectionType.push(type);
+      }
+    });
 
     await foundData.save();
 
@@ -268,6 +274,43 @@ exports.addConnectionTypesToChargingPoint = async (req, res) => {
       data: foundData,
     });
   } catch (error) {
+    console.error("Error updating connection types:", error);
+    return res.status(500).json({
+      success: false,
+      message: "An error occurred",
+      error: error.message,
+    });
+  }
+};
+
+exports.getConnectionTypesByChargingPoint = async (req, res) => {
+  try {
+    const chargingPointId = req?.user?.chargingPoint;
+
+    if (!chargingPointId) {
+      return res.status(400).json({
+        success: false,
+        message: "Charging point ID is required",
+      });
+    }
+
+    const chargingPoint = await ChargingPoint.findById(
+      chargingPointId
+    ).populate("connectionType");
+
+    if (!chargingPoint) {
+      return res.status(404).json({
+        success: false,
+        message: "Charging point not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: chargingPoint.connectionType,
+    });
+  } catch (error) {
+    console.error("Error fetching connection types:", error);
     return res.status(500).json({
       success: false,
       message: "An error occurred",
