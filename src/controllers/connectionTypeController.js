@@ -86,6 +86,56 @@ exports.updateConnectionTypeById = async (req, res) => {
   }
 };
 
+exports.updateConnectionTypeStatus = async (req, res) => {
+  try {
+    const { newStatus, connectionTypeId } = req.body;
+
+    if (!connectionTypeId) {
+      return res.status(400).json({
+        success: false,
+        message: "Connection type ID is required",
+      });
+    }
+
+    if (
+      !newStatus ||
+      !["inUse", "available", "outOfService"].includes(newStatus)
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Valid status is required",
+      });
+    }
+
+    const updatedConnectionType = await ConnectionType.findByIdAndUpdate(
+      connectionTypeId,
+      { status: newStatus },
+      { new: true, runValidators: true }
+    );
+
+    console.log("updatedConnectionType", updatedConnectionType);
+
+    if (!updatedConnectionType) {
+      return res.status(400).json({
+        success: false,
+        message: "Connection type not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Connection type status updated successfully",
+      data: updatedConnectionType,
+    });
+  } catch (error) {
+    console.error("Error updating connection type status:", error);
+    return res.status(500).json({
+      success: false,
+      message: "An error occurred",
+      error: error.message,
+    });
+  }
+};
 // Delete a connection type by ID
 exports.deleteConnectionTypeById = async (req, res) => {
   try {

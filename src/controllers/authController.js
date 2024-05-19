@@ -1,12 +1,8 @@
 const User = require("../models/user");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
-const ChargingPoint = require("../models/ChargingPoint");
 const VerifyEmail = require("../utils/sendEmail");
 const OTP = require("../../src/models/OTP");
-const mongoose = require("mongoose");
-const { ObjectId } = require("mongoose").Types;
-
 const otpGenerator = require("otp-generator");
 const {
   sendEmail,
@@ -15,6 +11,7 @@ const {
   sendResetEmail,
 } = require("../utils/sendEmail");
 require("dotenv").config();
+const ChargingPoint = require("../models/ChargingPoint");
 
 const generateTokens = (user) => {
   const accessToken = jwt.sign(
@@ -33,77 +30,81 @@ const generateTokens = (user) => {
 };
 
 const Login = async (req, res) => {
-  const { email, password } = req.body;
-  if (!email || !password)
-    return res
-      .status(400)
-      .json({ message: "Username and password are required." });
+  try {
+    const { email, password } = req.body;
 
-  const foundUser = await User.findOne({
-    email: email.toLowerCase().trim(),
-  }).exec();
-  console.log(".......................", foundUser);
-  if (!foundUser)
-    return res
-      .status(401)
-      .json({ success: false, message: "Unauthorized user" });
+    if (!email || !password) {
+      return res
+        .status(400)
+        .json({ message: "Username and password are required." });
+    }
 
-  const match = await foundUser.comparePassword(password);
+    const foundUser = await User.findOne({
+      email: email.toLowerCase().trim(),
+    }).exec();
+    if (!foundUser) {
+      return res
+        .status(401)
+        .json({ success: false, message: "Unauthorized user" });
+    }
 
-  if (match) {
+    const match = await foundUser.comparePassword(password);
+    if (!match) {
+      return res
+        .status(401)
+        .json({ success: false, message: "Unauthorized user" });
+    }
+
     if (
       foundUser.isEmailVerified !== "true" &&
       foundUser.isEmailVerified !== true
     ) {
-      return res.json({
-        message: "User is not verified",
-      });
+      return res.json({ message: "User is not verified" });
     }
 
     const role = foundUser.role;
+    let accessToken;
+    let ChargingPointToken = null;
 
-    // Generate token
-    const acessToken = jwt.sign(
+    if (
+      role === "attendant" ||
+      role === "attendant-admin" ||
+      role === "charging-point-admin"
+    ) {
+      const chargingPoint = await ChargingPoint.findOne({
+        $or: [
+          { attendants: { $elemMatch: { $eq: foundUser._id } } },
+          { adminUser: { $elemMatch: { $eq: foundUser._id } } },
+        ],
+      }).lean();
+
+      if (chargingPoint) {
+        ChargingPointToken = chargingPoint._id;
+      }
+    }
+
+    acessToken = jwt.sign(
       {
         name: foundUser.email,
         role: foundUser.role,
         foundUserId: foundUser._id,
+        chargingPoint: ChargingPointToken ? ChargingPointToken : null,
       },
       process.env.REFRESH_TOKEN_SECRET,
       { expiresIn: "1d" }
     );
 
-    // Save refresh token with current user
-    // foundUser.refreshToken.push(refreshToken);
     await foundUser.save();
 
-    let chargeToken = null;
-
-    // Check if user role is "attendant" or "attendant-admin"
-    console.log("foundUser[[[[[[[[[[[", foundUser._id);
-    if (
-      foundUser.role === "attendant" ||
-      foundUser.role === "attendant-admin"
-    ) {
-      const chargingPoint = await ChargingPoint.find({
-        attendants: {
-          $elemMatch: { $eq: new ObjectId(foundUser._id) },
-        },
-      }).lean();
-
-      // return console.log(
-      //   "//////////////////////////////////////",
-      //   chargingPoint
-      // // );
-      // if (chargingPoint) {
-      //   chargeToken = chargingPoint.toObject();
-      // }
-    }
-
-    // console.log("tonen", acessToken);
-    res.json({ role, acessToken, isAdmin: match.isAdmin, chargeToken });
-  } else {
-    res.sendStatus(401);
+    return res.json({
+      role,
+      acessToken,
+      isAdmin: foundUser.isAdmin,
+      chargingId: ChargingPointToken,
+    });
+  } catch (error) {
+    console.error("Login error:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
 

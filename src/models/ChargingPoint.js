@@ -60,7 +60,7 @@ const chargingPointSchema = new mongoose.Schema({
   attendants: [
     {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Attendant",
+      ref: "User",
     },
   ],
 });

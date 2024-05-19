@@ -55,6 +55,7 @@ exports.createChargingPoint = async (req, res) => {
       },
     });
 
+    console.log("admin user", admin_user);
     newChargingPoint.adminUser = [
       ...(newChargingPoint.adminUser || []),
       admin_user,
@@ -101,7 +102,6 @@ exports.findChargingPointByAttendant = async (req, res) => {
 
 exports.addAttendantToChargingPoint = async (req, res) => {
   try {
-    return console.log("reeeee", req.body);
     // Validate user data
     const userData = req.body;
     await validateUserData(userData);
@@ -109,9 +109,10 @@ exports.addAttendantToChargingPoint = async (req, res) => {
     // Create new user
     const newUser = await createUser(userData);
 
+    console.log("userdaata", req.user.chargingPoint);
     // Add user as attendant to charging point
     const { chargingPointId, attendantId } = userData;
-    await addAttendantToChargingPoint(chargingPointId, attendantId);
+    await addAttendantToChargingPoint(req?.user?.chargingPoint, newUser?._id);
 
     res.status(200).json({
       success: true,
@@ -191,9 +192,43 @@ const addAttendantToChargingPoint = async (chargingPointId, attendantId) => {
   await chargingPoint.save();
 };
 
+exports.getAttendantsByChargingPoint = async (req, res) => {
+  try {
+    const chargingPointId = req?.user?.chargingPoint;
+
+    if (!chargingPointId) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Charging Point ID is required." });
+    }
+    const chargingPoint = await ChargingPoint.findById(
+      chargingPointId
+    ).populate({
+      path: "attendants",
+      select: "-password",
+    });
+
+    if (!chargingPoint) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Charging Point not found." });
+    }
+
+    const attendants = chargingPoint.attendants;
+
+    return res.status(200).json({ success: true, data: attendants });
+  } catch (error) {
+    console.error(error);
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal Server Error" });
+  }
+};
+
 exports.addConnectionTypesToChargingPoint = async (req, res) => {
   try {
-    const chargingPointId = req.body.id;
+    const chargingPointId = req?.user?.chargingPoint;
+
     const connectionTypeData = req.body.connectionType;
 
     if (!chargingPointId) {
@@ -212,18 +247,24 @@ exports.addConnectionTypesToChargingPoint = async (req, res) => {
       });
     }
 
-    if (!connectionTypeData) {
-      return res.status(400).json({
-        success: false,
-        message: "Connection type data is required",
-      });
-    }
+    // if (!connectionTypeData || !Array.isArray(connectionTypeData)) {
+    //   return res.status(400).json({
+    //     success: false,
+    //     message: "Connection type data is required and should be an array",
+    //   });
+    // }
 
-    // Deduplicate connection types and add new ones
-    const uniqueConnectionTypes = [
-      ...new Set([...foundData.connectionType, ...connectionTypeData]),
-    ];
-    foundData.connectionType = uniqueConnectionTypes;
+    // Add only unique connection types to the array
+    const existingConnectionTypes = foundData.connectionType.map((type) =>
+      type.toString()
+    );
+
+    console.log("21");
+    connectionTypeData.forEach((type) => {
+      if (!existingConnectionTypes.includes(type.toString())) {
+        foundData.connectionType.push(type);
+      }
+    });
 
     await foundData.save();
 
@@ -233,6 +274,43 @@ exports.addConnectionTypesToChargingPoint = async (req, res) => {
       data: foundData,
     });
   } catch (error) {
+    console.error("Error updating connection types:", error);
+    return res.status(500).json({
+      success: false,
+      message: "An error occurred",
+      error: error.message,
+    });
+  }
+};
+
+exports.getConnectionTypesByChargingPoint = async (req, res) => {
+  try {
+    const chargingPointId = req?.user?.chargingPoint;
+
+    if (!chargingPointId) {
+      return res.status(400).json({
+        success: false,
+        message: "Charging point ID is required",
+      });
+    }
+
+    const chargingPoint = await ChargingPoint.findById(
+      chargingPointId
+    ).populate("connectionType");
+
+    if (!chargingPoint) {
+      return res.status(404).json({
+        success: false,
+        message: "Charging point not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: chargingPoint.connectionType,
+    });
+  } catch (error) {
+    console.error("Error fetching connection types:", error);
     return res.status(500).json({
       success: false,
       message: "An error occurred",
@@ -300,6 +378,7 @@ exports.getChargingPointById = async (req, res) => {
     }
 
     // Find the charging point by ID and populate its related fields
+    return;
     const chargingPoint = await ChargingPoint.findOne({ _id: id })
       .populate("amenities")
       .populate("connectionType")
