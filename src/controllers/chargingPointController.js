@@ -55,6 +55,7 @@ exports.createChargingPoint = async (req, res) => {
       },
     });
 
+    console.log("admin user", admin_user);
     newChargingPoint.adminUser = [
       ...(newChargingPoint.adminUser || []),
       admin_user,
@@ -101,7 +102,6 @@ exports.findChargingPointByAttendant = async (req, res) => {
 
 exports.addAttendantToChargingPoint = async (req, res) => {
   try {
-    return console.log("reeeee", req.body);
     // Validate user data
     const userData = req.body;
     await validateUserData(userData);
@@ -109,9 +109,10 @@ exports.addAttendantToChargingPoint = async (req, res) => {
     // Create new user
     const newUser = await createUser(userData);
 
+    console.log("userdaata", req.user.chargingPoint);
     // Add user as attendant to charging point
     const { chargingPointId, attendantId } = userData;
-    await addAttendantToChargingPoint(chargingPointId, attendantId);
+    await addAttendantToChargingPoint(req?.user?.chargingPoint, newUser?._id);
 
     res.status(200).json({
       success: true,
@@ -174,6 +175,7 @@ const createUser = async (userData) => {
 };
 
 const addAttendantToChargingPoint = async (chargingPointId, attendantId) => {
+  console.log("herer", attendantId);
   const chargingPoint = await ChargingPoint.findById(chargingPointId);
   if (!chargingPoint) {
     throw { status: 404, message: "Charging point not found" };
@@ -189,6 +191,39 @@ const addAttendantToChargingPoint = async (chargingPointId, attendantId) => {
 
   chargingPoint.attendants.push(attendantId);
   await chargingPoint.save();
+};
+
+exports.getAttendantsByChargingPoint = async (req, res) => {
+  try {
+    const chargingPointId = req?.user?.chargingPoint;
+
+    if (!chargingPointId) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Charging Point ID is required." });
+    }
+    const chargingPoint = await ChargingPoint.findById(
+      chargingPointId
+    ).populate({
+      path: "attendants",
+      select: "-password",
+    });
+
+    if (!chargingPoint) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Charging Point not found." });
+    }
+
+    const attendants = chargingPoint.attendants;
+
+    return res.status(200).json({ success: true, data: attendants });
+  } catch (error) {
+    console.error(error);
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal Server Error" });
+  }
 };
 
 exports.addConnectionTypesToChargingPoint = async (req, res) => {
@@ -300,6 +335,7 @@ exports.getChargingPointById = async (req, res) => {
     }
 
     // Find the charging point by ID and populate its related fields
+    return;
     const chargingPoint = await ChargingPoint.findOne({ _id: id })
       .populate("amenities")
       .populate("connectionType")

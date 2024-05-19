@@ -26,6 +26,11 @@ router.get(
   Authenticated,
   ChargingPointController.findChargingPointByAttendant
 );
+router.get(
+  "/attendants-by-charging-point",
+  Authenticated,
+  ChargingPointController.getAttendantsByChargingPoint
+);
 router.post(
   "/add-attendants",
   Authenticated,
