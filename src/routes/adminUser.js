@@ -9,5 +9,6 @@ router.post("/verify-email", AdminController.adminVerifyEmail);
 router.post("/verify-me", AuthController.adminVerifyEmail);
 router.post("/disable-admin", AdminController.disableAdmin);
 router.get("/admin-users", AdminController.getAllAdmins);
+router.get("/totals", AdminController.getAdminTotalCounts);
 
 module.exports = router;

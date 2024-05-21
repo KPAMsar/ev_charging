@@ -14,6 +14,16 @@ router.post("/", Authenticated, (req, res) => {
 // Get All
 router.get("/", Authenticated, BookingController.getAllBookings);
 
+router.get(
+  "/top-charging-points",
+  Authenticated,
+  BookingController.getTopChargingPoints
+);
+router.get(
+  "/bookings-by-charging-point",
+  Authenticated,
+  BookingController.getAllBookingsByChargingPoint
+);
 // Get Booking by ID
 router.get("/:id", Authenticated, BookingController.getBookingById);
 

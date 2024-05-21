@@ -1,7 +1,9 @@
-const BookingSlot = require("../models/Booking");
+const Booking = require("../models/Booking");
 const Notification = require("../models/Notification");
+const ChargingPoint = require("../models/ChargingPoint");
+// const { customAlphabet } = require("nanoid");
 
-exports.createBooking = async (req, res, io) => {
+exports.createBooking = async (req, res) => {
   try {
     const {
       charging_point,
@@ -35,9 +37,14 @@ exports.createBooking = async (req, res, io) => {
         });
       }
     }
+    const { customAlphabet } = await import("nanoid");
+
+    // Create a custom nanoid function
+    const nanoid = customAlphabet("1234567890abcdef", 10);
+    const bookingId = `ConnectVolt-${nanoid()}`;
 
     // Create a new booking slot
-    const newBooking = new BookingSlot({
+    const newBooking = new Booking({
       charging_point,
       vehicle_model,
       connection_type,
@@ -46,6 +53,7 @@ exports.createBooking = async (req, res, io) => {
       time,
       price,
       user,
+      booking_id: bookingId,
     });
 
     // Save the new booking slot to the database
@@ -76,13 +84,53 @@ exports.createBooking = async (req, res, io) => {
 
 exports.getAllBookings = async (req, res) => {
   try {
-    const bookings = await BookingSlot.find()
-      .populate("vehicleType")
-      .populate("vehicleModel")
-      .populate("connectionType")
-      .populate("price");
+    // const bookings = await Booking.find().populate(
+    //   "connection_type vehicle_model user vehicle_type price charging_point"
+    // );
+
+    const bookings = await Booking.find().populate([
+      { path: "connection_type", model: "ConnectionType" },
+      { path: "vehicle_model", model: "VehicleModel" },
+      { path: "user", model: "User" },
+      { path: "vehicle_type", model: "VehicleType" },
+      { path: "price", model: "Price" },
+      { path: "charging_point", model: "ChargingPoint" },
+    ]);
 
     return res.json(bookings);
+  } catch (error) {
+    console.error(error);
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal Server Error" });
+  }
+};
+
+exports.getAllBookingsByChargingPoint = async (req, res) => {
+  try {
+    const chargingPointId = req?.user?.chargingPoint;
+    console.log("chargingPointId", chargingPointId);
+    if (!chargingPointId) {
+      return res.status(400).json({
+        success: false,
+        message: "Charging point ID is required",
+      });
+    }
+
+    const bookings = await Booking.find({
+      charging_point: chargingPointId,
+    }).populate(
+      "connection_type vehicle_model user vehicle_type price charging_point"
+    );
+
+    if (!bookings || bookings.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "No bookings found for this charging point",
+      });
+    }
+
+    return res.json({ success: true, data: bookings });
   } catch (error) {
     console.error(error);
     return res
@@ -99,7 +147,7 @@ exports.getBookingById = async (req, res) => {
         .status(400)
         .json({ success: false, message: "ID is required" });
     }
-    const booking = await BookingSlot.findById(id);
+    const booking = await Booking.findById(id);
     if (!booking) {
       return res
         .status(404)
@@ -141,7 +189,7 @@ exports.updateBooking = async (req, res) => {
         message: "All fields are required",
       });
     }
-    const updatedBooking = await BookingSlot.findByIdAndUpdate(
+    const updatedBooking = await Booking.findByIdAndUpdate(
       id,
       {
         vehicleType,
@@ -176,7 +224,7 @@ exports.deleteBooking = async (req, res) => {
         .status(400)
         .json({ success: false, message: "ID is required" });
     }
-    const deletedBooking = await BookingSlot.findByIdAndDelete(id);
+    const deletedBooking = await Booking.findByIdAndDelete(id);
     if (!deletedBooking) {
       return res
         .status(404)
@@ -188,5 +236,69 @@ exports.deleteBooking = async (req, res) => {
     return res
       .status(500)
       .json({ success: false, message: "Internal Server Error" });
+  }
+};
+
+exports.getTopChargingPoints = async (req, res) => {
+  try {
+    // Find all bookings with 'charged' status and populate the 'charging_point' field
+    const bookings = await Booking.find({ charge_status: "charged" }).populate(
+      "charging_point"
+    );
+
+    if (!bookings.length) {
+      return res.status(200).json({
+        success: true,
+        data: [],
+        message: "No bookings with 'charged' status found",
+      });
+    }
+
+    const chargingPointPerformance = {};
+
+    bookings.forEach((booking) => {
+      const chargingPoint = booking.charging_point;
+      if (chargingPoint) {
+        const chargingPointId = chargingPoint._id.toString();
+        if (!chargingPointPerformance[chargingPointId]) {
+          chargingPointPerformance[chargingPointId] = 0;
+        }
+        chargingPointPerformance[chargingPointId]++;
+      }
+    });
+
+    const sortedChargingPoints = Object.entries(chargingPointPerformance)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 10);
+
+    if (!sortedChargingPoints.length) {
+      return res.status(200).json({
+        success: true,
+        data: [],
+        message: "No charging points with 'charged' bookings found",
+      });
+    }
+
+    const topChargingPoints = await Promise.all(
+      sortedChargingPoints.map(async ([chargingPointId]) => {
+        const chargingPoint = await ChargingPoint.findById(chargingPointId);
+        return {
+          chargingPoint,
+          completedBookings: chargingPointPerformance[chargingPointId],
+        };
+      })
+    );
+
+    return res.status(200).json({
+      success: true,
+      data: topChargingPoints,
+    });
+  } catch (error) {
+    console.error("Error fetching top charging points:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+      error: error.message,
+    });
   }
 };
