@@ -4,6 +4,8 @@ const bcrypt = require("bcrypt");
 const VerifyEmail = require("../utils/sendEmail");
 const OTP = require("../../src/models/OTP");
 const otpGenerator = require("otp-generator");
+const ChargingPoint = require("../../src/models/ChargingPoint");
+const Booking = require("../../src/models/Booking");
 
 exports.adminSignUp = async (req, res) => {
   try {
@@ -187,4 +189,38 @@ const getAllAdmins = async (req, res) => {
   }
 };
 
-module.exports = { adminVerifyEmail, disableAdmin, getAllAdmins };
+const getAdminTotalCounts = async (req, res) => {
+  try {
+    const totalUsers = await User.countDocuments();
+    const totalChargingPoints = await ChargingPoint.countDocuments();
+    const totalBookings = await Booking.countDocuments();
+    const totalAdminUsers = await User.countDocuments({ role: "admin" });
+    const totalAttendants = await User.countDocuments({ role: "attendant" });
+    const totalChargingStations = await ChargingPoint.countDocuments(); //
+    const totalChargingPointAdmins = await User.countDocuments({
+      role: "charging-point-admin",
+    });
+
+    res.json({
+      totalUsers,
+      totalChargingPoints,
+      totalBookings,
+      totalAdminUsers,
+      totalAttendants,
+      totalChargingStations,
+      totalChargingPointAdmins,
+    });
+  } catch (error) {
+    console.error("Error fetching totals:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+module.exports = { getTotalCounts };
+
+module.exports = {
+  adminVerifyEmail,
+  getAdminTotalCounts,
+  disableAdmin,
+  getAllAdmins,
+};

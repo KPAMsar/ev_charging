@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 
 const bookingSchema = new mongoose.Schema({
+  booking_id: String,
   charging_point: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "ChargingPoint",
