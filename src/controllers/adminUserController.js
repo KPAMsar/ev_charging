@@ -216,8 +216,6 @@ const getAdminTotalCounts = async (req, res) => {
   }
 };
 
-module.exports = { getTotalCounts };
-
 module.exports = {
   adminVerifyEmail,
   getAdminTotalCounts,
