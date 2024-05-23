@@ -60,14 +60,22 @@ exports.sendEmail = async (email, otp) => {
 exports.sendSuccessRegEmail = async () => {
   // return console.log("email", message);
   try {
-    const transporter = nodemailer.createTransport({
-      // service: 'process.env.SERVICE',
-      host: "smtp.gmail.com",
-      port: 465,
-      secure: true,
+    // const transporter = nodemailer.createTransport({
+    //   // service: 'process.env.SERVICE',
+    //   host: "smtp.gmail.com",
+    //   port: 465,
+    //   secure: true,
+    //   auth: {
+    //     pass: process.env.APP_PASSWORD,
+    //     user: process.env.SENDER_MAIL,
+    //   },
+    // });
+    var transport = nodemailer.createTransport({
+      host: "sandbox.smtp.mailtrap.io",
+      port: 2525,
       auth: {
-        pass: process.env.APP_PASSWORD,
-        user: process.env.SENDER_MAIL,
+        user: process.env.MAIL_TRAP_USERNAME,
+        pass: process.env.MAIL_TRAP_PWORD,
       },
     });
 
