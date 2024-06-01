@@ -59,6 +59,17 @@ exports.createBooking = async (req, res) => {
     // Save the new booking slot to the database
     await newBooking.save();
 
+    const newNotification = new Notification({
+      recipient: user,
+      chargingPoint: charging_point,
+      type: "info",
+      title: "New Booking Created",
+      message: `Your booking (ID: ${newBooking.booking_id}) has been created successfully.`,
+      status: "unread",
+      url: `/bookings/${newBooking._id}`,
+    });
+
+    await newNotification.save();
     // Emit the new booking event using the io object
     const saveNotification = new Notification({
       message: "New Booking ",
