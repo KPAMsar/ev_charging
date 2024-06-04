@@ -2,19 +2,39 @@ const mongoose = require("mongoose");
 
 const notificationSchema = new mongoose.Schema(
   {
+    recipient: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    chargingPoint: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "chargingPoint",
+      required: true,
+    },
+    type: {
+      type: String,
+      enum: ["info", "warning", "alert", "message"],
+      default: "info",
+    },
+    title: {
+      type: String,
+      required: true,
+    },
     message: {
       type: String,
       required: true,
     },
-    booking: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Booking",
-      required: true,
+    status: {
+      type: String,
+      enum: ["unread", "read", "archived"],
+      default: "unread",
     },
-    user: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
+    url: {
+      type: String,
+    },
+    readAt: {
+      type: Date,
     },
   },
   { timestamps: true }

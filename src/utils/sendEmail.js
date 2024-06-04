@@ -6,54 +6,53 @@ dotenv.config();
 
 // const smtpTransport = require('nodemailer-smtp-transport');
 exports.sendEmail = async (email, otp) => {
-  // return console.log("email", message);
   try {
-    const transporter = nodemailer.createTransport({
-      // service: 'process.env.SERVICE',
-      host: "smtp.gmail.com",
-      port: 465,
-      secure: true,
+    // Create transporter object using the default SMTP transport
+    var transporter = nodemailer.createTransport({
+      host: "sandbox.smtp.mailtrap.io",
+      port: 2525,
       auth: {
-        pass: process.env.APP_PASSWORD,
-        user: process.env.SENDER_MAIL,
+        user: process.env.MAIL_TRAP_USERNAME,
+        pass: process.env.MAIL_TRAP_PWORD,
+      },
+      tls: {
+        rejectUnauthorized: false,
       },
     });
 
-    const sendCompanyMail = await transporter.sendMail({
-      from: "TEST@EV-CHARGING",
+    // Define email options
+    const mailOptions = {
+      from: '"Connect Volt" <noreply@connectvolt.com>',
       to: email,
-      subject: "EV Charging Email Verification",
-      html: ` 
-          <p>Dear User,
-<br>
-          Thank you for registering with us. Your One Time Password (OTP) for email verification is:
-          <br>
-          <b>${otp}</b>
-          <br>
-          Please use this OTP to complete the verification process. If you have any questions or concerns, feel free to reach out to our support team.
-          <br>
-          Best regards,<br>
-          EV Charging Team </p>
-         
-          `,
+      subject: "Connect Volt Charging Email Verification",
+      html: `
+      <img src='' >
+        <p>Dear User,<br>
+        Thank you for registering with us. Your One Time Password (OTP) for email verification is:<br>
+        <b>${otp}</b><br>
+        Please use this OTP to complete the verification process. If you have any questions or concerns, feel free to reach out to our support team.<br>
+        Best regards,<br>
+        EV Charging Team</p>
+      `,
       headers: {
         "x-priority": "1",
         "x-msmail-priority": "High",
         importance: "high",
       },
-    });
+    };
 
-    if (
-      sendCompanyMail &&
-      sendCompanyMail.response &&
-      sendCompanyMail.response.startsWith("250")
-    ) {
+    // Send email
+    const sendCompanyMail = await transporter.sendMail(mailOptions);
+
+    if (sendCompanyMail && sendCompanyMail.accepted.length > 0) {
       return true;
     } else {
+      console.log("Email not sent:", sendCompanyMail);
       return false;
     }
   } catch (error) {
-    console.log(error, "email not sent");
+    console.error("Error sending email:", error);
+    return false;
   }
 };
 
@@ -70,9 +69,10 @@ exports.sendSuccessRegEmail = async () => {
     //     user: process.env.SENDER_MAIL,
     //   },
     // });
-    var transport = nodemailer.createTransport({
+
+    var transporter = nodemailer.createTransport({
       host: "sandbox.smtp.mailtrap.io",
-      port: 2525,
+      port: 586,
       auth: {
         user: process.env.MAIL_TRAP_USERNAME,
         pass: process.env.MAIL_TRAP_PWORD,
@@ -126,14 +126,12 @@ exports.sendSuccessRegEmail = async () => {
 exports.sendResetEmail = async (email, otp) => {
   // return console.log("email", message);
   try {
-    const transporter = nodemailer.createTransport({
-      // service: 'process.env.SERVICE',
-      host: "smtp.gmail.com",
-      port: 465,
-      secure: true,
+    var transporter = nodemailer.createTransport({
+      host: "sandbox.smtp.mailtrap.io",
+      port: 586,
       auth: {
-        pass: process.env.APP_PASSWORD,
-        user: process.env.SENDER_MAIL,
+        user: process.env.MAIL_TRAP_USERNAME,
+        pass: process.env.MAIL_TRAP_PWORD,
       },
     });
 
@@ -179,14 +177,12 @@ Please use this OTP to proceed with resetting your password. If you did not requ
 exports.sendSuccessResetEmail = async (email) => {
   // return console.log("email", message);
   try {
-    const transporter = nodemailer.createTransport({
-      // service: 'process.env.SERVICE',
-      host: "smtp.gmail.com",
-      port: 465,
-      secure: true,
+    var transporter = nodemailer.createTransport({
+      host: "sandbox.smtp.mailtrap.io",
+      port: 586,
       auth: {
-        pass: process.env.APP_PASSWORD,
-        user: process.env.SENDER_MAIL,
+        user: process.env.MAIL_TRAP_USERNAME,
+        pass: process.env.MAIL_TRAP_PWORD,
       },
     });
 
