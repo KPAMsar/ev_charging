@@ -3,17 +3,17 @@ const Notification = require("../models/Notification");
 // Create a new notification
 exports.createNotification = async (req, res) => {
   try {
-    const { recipient, type, title, message, status, url } = req.body;
-
-    if (!recipient || !title || !message) {
+    const { type, title, message, status, url } = req.body;
+    const user = req?.user?.foundUserId;
+    if (!title || !message) {
       return res.status(400).json({
         success: false,
-        message: "Recipient, title, and message are required",
+        message: " Title, and message are required",
       });
     }
 
     const newNotification = new Notification({
-      recipient,
+      recipient: user,
       type,
       title,
       message,

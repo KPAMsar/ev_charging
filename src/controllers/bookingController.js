@@ -70,14 +70,20 @@ exports.createBooking = async (req, res) => {
     });
 
     await newNotification.save();
+
     // Emit the new booking event using the io object
     const saveNotification = new Notification({
-      message: "New Booking ",
-      user: req.user.foundUserId,
-      booking: newBooking._id,
+      recipient: user,
+      chargingPoint: charging_point,
+      type: "info",
+      title: "New Booking Notification",
+      message: `A new booking has been created. Booking ID: ${newBooking.booking_id}`,
+      status: "unread",
+      url: `/bookings/${newBooking._id}`,
     });
 
     await saveNotification.save();
+
     // Send a successful response with the created booking slot
     return res.status(201).json({
       success: true,
@@ -86,7 +92,7 @@ exports.createBooking = async (req, res) => {
     });
   } catch (error) {
     // Handle errors
-    console.error(error);
+    console.error(error.message);
     return res
       .status(500)
       .json({ success: false, message: "Internal Server Error" });

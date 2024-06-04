@@ -73,6 +73,7 @@ exports.adminSignUp = async (req, res) => {
     const sentMail = await sendEmail(savedUser.email, code);
 
     console.log("Mail sent:", sentMail);
+    console.log("email:", savedUser.email);
 
     return res.status(200).json({
       success: true,
