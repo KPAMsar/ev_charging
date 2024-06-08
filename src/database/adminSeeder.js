@@ -3,16 +3,26 @@ const bcrypt = require("bcrypt");
 
 const LoadUsers = async () => {
   try {
+    pwd = "password";
+    const hashedPassword = await bcrypt.hash(pwd, 10);
     const users = await User.find();
     if (users.length > 0) {
-      console.log("Users already seeded", users);
+      // console.log("Users already seeded", users);
+      const newUser = new User({
+        name: "Super-Admin User",
+        email: "superadmin@gmail.com",
+        isEmailVerified: true,
+        password: hashedPassword,
+        role: "super-admin",
+      });
+      const result = await newUser.save();
     } else {
       const newUser = new User({
-        name: "Admin User",
-        email: "kpamdev@gmail.com",
-        password:
-          "$2b$10$qZaDPR3koVncOKvTVcpKn.24WNTcTan0U9eX8DQvMyFzqhgsQKTZm",
-        role: "admin",
+        name: "Super-Admin User",
+        email: "superadmin@gmail.com",
+        isEmailVerified: true,
+        password: hashedPassword,
+        role: "super-admin",
       });
       const result = await newUser.save();
       console.log("Database seeded successfully with i", result);
