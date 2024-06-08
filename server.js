@@ -6,8 +6,10 @@ const session = require("express-session");
 const cors = require("cors");
 const AppRoutes = require("./src/routes/app");
 const morgan = require("morgan");
+const path = require("path");
 
 // const GoogleAuthRouter = require("./src/routes/goggle-auth");
+
 const AuthRoutes = require("./src/routes/auth");
 const PrivacyPolicyRoutes = require("./src/routes/privacyPolicy");
 const FAQRoutes = require("./src/routes/faq");
@@ -30,6 +32,7 @@ const NotificationRoutes = require("./src/routes/notification");
 const ChargingPointAdminUserRoutes = require("./src/routes/chargingPointAdmin");
 const app = express();
 
+app.use(express.static(path.join(__dirname, "public")));
 const http = require("http").createServer(app);
 const io = require("socket.io")(http, {
   cors: {
