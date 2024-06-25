@@ -682,6 +682,34 @@ const getLoggedInUserByPosting = async (req, res) => {
   }
 };
 
+const disableUser = async (req, res) => {
+  try {
+    const user = await User.findByIdAndUpdate(
+      req.params.id,
+      { isActive: false },
+      { new: true }
+    );
+    if (!user) {
+      return res.status(404).send({ error: "User not found" });
+    }
+    res.send(user);
+  } catch (error) {
+    res.status(500).send({ error: "Failed to disable user" });
+  }
+};
+
+const deleteUser = async (req, res) => {
+  try {
+    const user = await User.findByIdAndDelete(req.params.id);
+    if (!user) {
+      return res.status(404).send({ error: "User not found" });
+    }
+    res.send({ message: "User deleted successfully" });
+  } catch (error) {
+    res.status(500).send({ error: "Failed to delete user" });
+  }
+};
+
 module.exports = {
   SignUp,
   Login,
@@ -694,4 +722,6 @@ module.exports = {
   getLoggedInUser,
   adminVerifyEmail,
   getLoggedInUserByPosting,
+  disableUser,
+  deleteUser,
 };

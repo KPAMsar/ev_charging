@@ -6,7 +6,7 @@ const PriceSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    value: {
+    baseValue: {
       type: Number,
       required: true,
     },
@@ -14,8 +14,21 @@ const PriceSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    duration: {
+      type: Number, // duration in hours
+      required: true,
+    },
+    rate: {
+      type: Number,
+      required: true,
+      default: 10, // default rate increase per hour
+    },
   },
   { timestamps: true }
 );
+
+PriceSchema.methods.calculatePrice = function (duration) {
+  return this.baseValue + this.rate * duration;
+};
 
 module.exports = mongoose.model("Price", PriceSchema);

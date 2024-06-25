@@ -19,6 +19,8 @@ router.post(
   AuthController.ChangePassword
 );
 router.get("/get-logged-user", Authenticate, AuthController.getLoggedInUser);
+router.delete("/users/:id", Authenticate, AuthController.deleteUser);
+router.patch("/users/:id/disable", Authenticate, AuthController.disableUser);
 router.post(
   "/post-get-logged-user",
   Authenticate,
