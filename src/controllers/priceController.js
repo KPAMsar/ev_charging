@@ -71,6 +71,37 @@ exports.getPrices = async (req, res) => {
   }
 };
 
+exports.getPriceByDuration = async (req, res) => {
+  try {
+    const { duration } = req.query;
+
+    if (!duration) {
+      return res.status(400).json({
+        success: false,
+        message: "Duration is required",
+      });
+    }
+
+    const price = await Price.findOne({ duration });
+
+    if (!price) {
+      return res.status(404).json({
+        success: false,
+        message: "Price not found for the specified duration",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: price,
+    });
+  } catch (error) {
+    console.error(error.message);
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal Server Error" });
+  }
+};
 // Controller to get a single price by ID
 exports.getPriceById = async (req, res) => {
   try {
