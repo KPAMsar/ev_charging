@@ -57,9 +57,9 @@ app.use(morgan("dev"));
 app.use(passport.initialize());
 app.use(passport.session());
 
-// app.use("/", (req, res) => {
-//   return res.send("Hello welcome to Connect Volt api");
-// });
+app.use("/", (req, res) => {
+  return res.send("Hello welcome to Connect Volt api");
+});
 // app.use("", GoogleAuthRouter);
 app.use("/api/auth/", AuthRoutes);
 app.use("/api/privacy-policy", PrivacyPolicyRoutes);
@@ -83,17 +83,6 @@ app.use("/api/notification", NotificationRoutes);
 app.use("/api/charging-point-admin", ChargingPointAdminUserRoutes);
 
 const port = process.env.PORT || 5001;
-
-io.on("connection", (socket) => {
-  console.log("A user connected");
-
-  // Handle successful POST operation notification event
-  socket.on("postSuccess", (data) => {
-    console.log("POST operation successful:", data);
-    // Broadcast notification to all connected clients
-    io.emit("notification", data);
-  });
-});
 
 app.listen(port, () => {
   console.log(`App is running on port ${port}`);
