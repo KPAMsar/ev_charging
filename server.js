@@ -57,7 +57,7 @@ app.use(morgan("dev"));
 app.use(passport.initialize());
 app.use(passport.session());
 
-app.use("/", (req, res) => {
+app.use("/home", (req, res) => {
   return res.send("Hello welcome to Connect Volt api");
 });
 // app.use("", GoogleAuthRouter);
