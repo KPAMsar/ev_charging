@@ -180,7 +180,9 @@ const disableAdmin = async (req, res) => {
 
 const getAllAdmins = async (req, res) => {
   try {
-    const admins = await User.find({ role: "admin" });
+    const attendants = await User.find({ role: "attendant" });
+
+    console.log("admins", admins);
     return res.json({ success: true, admins });
   } catch (error) {
     console.error(error);
