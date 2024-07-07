@@ -5,7 +5,7 @@
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js",
+    "start": "nodemon server.js",
     "seeder": "node seeder.js"
   },
   "author": "Kpamsar Shija",
@@ -27,7 +27,6 @@
     "multer": "^1.4.5-lts.1",
     "nanoid": "^5.0.7",
     "nodemailer": "^6.9.12",
-    "nodemon": "^3.1.0",
     "otp-generator": "^4.0.1",
     "passport": "^0.7.0",
     "passport-google-authcode": "^0.1.5",
@@ -35,5 +34,8 @@
     "passport-google-oauth20": "^2.0.0",
     "socket.io": "^4.7.5",
     "winston": "^3.12.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.4"
   }
 }

@@ -6,6 +6,8 @@ const getAllChargingPointAdmins = async (req, res) => {
       role: "charging-point-admin",
     }).select("-password");
 
+
+    console.log('chargingPointAdmins',chargingPointAdmins)
     res.status(200).json({
       success: true,
       message: "Charging point admins retrieved successfully",

@@ -38,7 +38,7 @@ exports.createNotification = async (req, res) => {
 // Get all notifications
 exports.getAllNotifications = async (req, res) => {
   try {
-    const notifications = await Notification.find();
+    const notifications = await Notification.find().populate('recipient');
     return res.status(200).json({
       success: true,
       message: "List of all notifications",

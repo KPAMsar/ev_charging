@@ -38,6 +38,7 @@ router.post(
   Authenticated,
   ChargingPointController.addAttendantToChargingPoint
 );
+router.post("/verify-attendant",)
 
 // Get all charging points
 router.get("/", Authenticated, ChargingPointController.getAllChargingPoints);

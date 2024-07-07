@@ -403,6 +403,51 @@ exports.getChargingPointById = async (req, res) => {
   }
 };
 
+
+// Update isEmailVerified field
+exports.updateAttendantEmailVerification = async (req, res) => {
+  try {
+    const { attendantId } = req.body;
+
+    // Validate the input data
+    if (!attendantId) {
+      return res.status(400).json({
+        success: false,
+        message: "Attendant ID is required",
+      });
+    }
+
+    // Check if the attendant exists
+    const existingAttendant = await User.findById(attendantId);
+    if (!existingAttendant) {
+      return res.status(404).json({
+        success: false,
+        message: "Attendant not found",
+      });
+    }
+
+    // Update the isEmailVerified field
+    existingAttendant.isEmailVerified = true;
+
+    // Save the updated attendant details
+    const updatedAttendant = await existingAttendant.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Attendant email verification status updated successfully",
+      data: updatedAttendant,
+    });
+  } catch (error) {
+    console.error("Error updating attendant email verification status:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+      error: error.message,
+    });
+  }
+};
+
+
 // Update a charging point by ID
 exports.updateChargingPoint = async (req, res) => {
   try {

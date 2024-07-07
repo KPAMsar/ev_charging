@@ -6,6 +6,8 @@ const OTP = require("../../src/models/OTP");
 const otpGenerator = require("otp-generator");
 const ChargingPoint = require("../../src/models/ChargingPoint");
 const Booking = require("../../src/models/Booking");
+const { generateOTP } = require("../utils/otpGenerator");
+const { sendEmail } = require("../utils/sendEmail");
 
 exports.adminSignUp = async (req, res) => {
   try {
@@ -102,6 +104,73 @@ exports.adminSignUp = async (req, res) => {
   }
 };
 
+const addStationAdmin = async (req, res) => {
+  try {
+    const { first_name, last_name, email, phone_number,isEmailVerified,password } = req.body;
+
+    if (!first_name || !last_name || !email || !phone_number) {
+      return res
+        .status(400)
+        .json({ success: false, message: "All fields are required." });
+    }
+
+    // Check if email is already registered
+    const existingEmail = await User.findOne({ email }).exec();
+    if (existingEmail) {
+      return res.status(409).json({
+        success: false,
+        message: "Email is already taken by another user.",
+      });
+    }
+
+    // Check if phone number is already registered
+    const existingPhoneNumber = await User.findOne({ phone_number }).exec();
+    if (existingPhoneNumber) {
+      return res.status(409).json({
+        success: false,
+        message: "Phone number is already taken by another user.",
+      });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const newUser = new User({
+      firstname: first_name,
+      lastname: last_name,
+      email: email.toLowerCase().trim(),
+      phone_number,
+      password: hashedPassword,
+      isEmailVerified,
+      role: "charging-point-admin",
+    });
+
+    const savedUser = await newUser.save();
+    const otp = await generateOTP(email.toLowerCase().trim());
+
+    sendEmail(email.toLowerCase().trim(), otp);
+    return res.status(200).json({
+      success: true,
+      message: "Admin added successfully.",
+      data: {
+        email: savedUser.email,
+        phone_number: savedUser.phone_number,
+      },
+    });
+  } catch (error) {
+    console.error("Add Attendant error:", error);
+
+    if (error.code === 11000) {
+      // MongoDB duplicate key error code
+      return res.status(409).json({
+        success: false,
+        message: "Email or phone number is already taken.",
+      });
+    }
+
+    res.status(500).json({ success: false, message: "Internal Server Error" });
+  }
+};
+
 const adminVerifyEmail = async (req, res, email, code) => {
   console.log("heeheheheh");
   try {
@@ -180,9 +249,8 @@ const disableAdmin = async (req, res) => {
 
 const getAllAdmins = async (req, res) => {
   try {
-    const attendants = await User.find({ role: "attendant" });
+    const admins= await User.find({ role: "attendant" });
 
-    console.log("admins", admins);
     return res.json({ success: true, admins });
   } catch (error) {
     console.error(error);
@@ -224,4 +292,5 @@ module.exports = {
   getAdminTotalCounts,
   disableAdmin,
   getAllAdmins,
+  addStationAdmin
 };
